@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GP Ansor Manyar — Gerakan Pemuda Ansor Kecamatan Manyar</title>
+  <meta name="theme-color" content="#1a7a3c" />
+  <meta property="og:title" content="GP Ansor Manyar" />
+  <meta property="og:description" content="Website resmi PAC GP Ansor Kecamatan Manyar, Gresik." />
+  <meta property="og:type" content="website" />
+  <meta name="description" content="Pimpinan Anak Cabang Gerakan Pemuda Ansor Kecamatan Manyar, Kabupaten Gresik." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="brand">
+        <img src="images/logo.png" alt="Logo GP Ansor" class="brand-logo" onerror="this.style.display='none'" />
+        <div class="brand-text">
+          <span class="brand-name">GP Ansor Manyar</span>
+          <span class="brand-sub">PAC Kec. Manyar · Kab. Gresik</span>
+        </div>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Buka menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link active">Beranda</a>
+        <a href="pages/kegiatan.html" class="nav-link">Kegiatan</a>
+        <a href="pages/ranting.html" class="nav-link">Ranting</a>
+        <a href="pages/pengurus.html" class="nav-link">Pengurus PAC</a>
+        <a href="pages/tentang.html" class="nav-link">Tentang</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-geo" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <div class="hero-badge">Pimpinan Anak Cabang</div>
+      <h1 class="hero-title">Gerakan Pemuda Ansor<br /><em>Kecamatan Manyar</em></h1>
+      <p class="hero-desc">Bersama membangun pemuda yang berkarakter, berdedikasi, dan berdaya di jantung kawasan industri Manyar — Gresik.</p>
+      <div class="hero-actions">
+        <a href="pages/kegiatan.html" class="btn btn-primary">Lihat Kegiatan</a>
+        <a href="pages/tentang.html" class="btn btn-outline">Tentang Kami</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num" id="jmlRanting">12</span><span class="stat-label">Ranting Aktif</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num" id="jmlAnggota">500+</span><span class="stat-label">Anggota</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num" id="jmlKegiatan">40+</span><span class="stat-label">Kegiatan/Tahun</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BANNER KEGIATAN MENDATANG -->
+  <section class="upcoming-banner" id="upcoming-banner">
+    <div class="container">
+      <div class="upcoming-inner" id="upcomingContent">
+        <!-- diisi dari data.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- HIGHLIGHT KEGIATAN TERAKHIR -->
+  <section class="section" id="highlight">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Dokumentasi Terkini</div>
+        <h2 class="section-title">Kegiatan Terakhir</h2>
+        <p class="section-desc">Jejak langkah GP Ansor Manyar dalam melayani masyarakat dan memberdayakan pemuda.</p>
+      </div>
+      <div class="kegiatan-grid" id="kegiatanGrid">
+        <!-- diisi dari data.js -->
+      </div>
+      <div class="section-footer">
+        <a href="pages/kegiatan.html" class="btn btn-outline">Semua Kegiatan →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- RANTING STRIP -->
+  <section class="section section-alt" id="rantingStrip">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Jaringan Organisasi</div>
+        <h2 class="section-title">Pimpinan Ranting</h2>
+        <p class="section-desc">GP Ansor Manyar hadir di seluruh desa/kelurahan di Kecamatan Manyar melalui Pimpinan Ranting.</p>
+      </div>
+      <div class="ranting-strip" id="rantingStrip">
+        <!-- diisi dari data.js -->
+      </div>
+      <div class="section-footer">
+        <a href="pages/ranting.html" class="btn btn-outline">Lihat Semua Ranting →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PENGURUS PAC PREVIEW -->
+  <section class="section" id="pengurusPAC">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Kepemimpinan</div>
+        <h2 class="section-title">Pimpinan Anak Cabang</h2>
+        <p class="section-desc">Pengurus PAC GP Ansor Manyar periode aktif yang berkomitmen menggerakkan organisasi.</p>
+      </div>
+      <div class="pengurus-preview" id="pengurusPreview">
+        <!-- diisi dari data.js -->
+      </div>
+      <div class="section-footer">
+        <a href="pages/pengurus.html" class="btn btn-outline">Lihat Seluruh Pengurus →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-text">
+          <span class="brand-name" style="color:#fff">GP Ansor Manyar</span>
+          <span class="brand-sub" style="color:rgba(255,255,255,0.6)">PAC Kec. Manyar · Kab. Gresik</span>
+        </div>
+        <p class="footer-tagline">Bergerak Bersama, Membangun Bangsa.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Navigasi</h4>
+          <a href="index.html">Beranda</a>
+          <a href="pages/kegiatan.html">Kegiatan</a>
+          <a href="pages/ranting.html">Ranting</a>
+          <a href="pages/pengurus.html">Pengurus PAC</a>
+          <a href="pages/tentang.html">Tentang</a>
+        </div>
+        <div class="footer-col">
+          <h4>Hubungi Kami</h4>
+          <a href="#" id="footerWa">WhatsApp</a>
+          <a href="#" id="footerIg">Instagram</a>
+          <a href="#" id="footerFb">Facebook</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>© <span id="year"></span> GP Ansor Manyar. Semua hak dilindungi.</span>
+        <a href="admin/index.html" class="admin-link">⚙ Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

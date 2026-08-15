@@ -1,0 +1,23 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (jika suatu saat pakai build tools)
+node_modules/
+dist/
+
+# Environment & secrets
+.env
+.env.local
+secrets.js
