@@ -14,21 +14,8 @@
    ============================================================ */
 
 const CONFIG = {
-  // Ganti dengan Spreadsheet ID kamu
-  // Contoh URL: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
-  SPREADSHEET_ID: 'https://docs.google.com/spreadsheets/d/16OXNSXor3m_TXsX1YKyusqn38gEDluB5dCqshs-8rJc/edit',
-
-  // Ganti dengan API Key Google Cloud kamu (opsional, untuk Sheets API v4)
-  API_KEY: 'GANTI_DENGAN_API_KEY_KAMU',
-
-  // Ganti dengan URL Apps Script Web App kamu (pilihan utama, lebih mudah)
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzblzahi1_74lW2UVi_zUNPvfQxQ3sa4GcpiHG-2XJBbLrt3fnN5bQ1O8OVNCtGCIoo/exec',
-
-  // Mode: 'apps_script' | 'sheets_api' | 'local'
-  // Gunakan 'local' dulu sebelum setup Google Sheets
-  MODE: 'local',
-
-  // Cache data di browser (menit)
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxLOIG9G-5g0VHKhil_QFk7xztCbouUHmkK1gWOKHrl5mxeFDg8ISGHTTxaHMF6wRb/exec',
+  MODE: 'apps_script', // <-- ASTIKAN SUDAH DIGANTI DARI 'local' KE 'apps_script'
   CACHE_MINUTES: 10,
 };
 
