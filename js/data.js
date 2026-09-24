@@ -14,7 +14,7 @@
    ============================================================ */
 
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxLOIG9G-5g0VHKhil_QFk7xztCbouUHmkK1gWOKHrl5mxeFDg8ISGHTTxaHMF6wRb/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw7e6E1qn80aSB3QNAUO0atO-CamKkk-nmwmHkg23PoaGvA8uOnwPW3H5K4gyJMlAr3/exec',
   MODE: 'apps_script', // <-- ASTIKAN SUDAH DIGANTI DARI 'local' KE 'apps_script'
   CACHE_MINUTES: 10,
 };
@@ -255,11 +255,18 @@ const SheetsDB = {
 
 const AnsorData = {
 
-  async getProfil() {
+ async getProfil() {
     const remote = await SheetsDB.fetch('profil');
     if (remote) {
-      // Konversi format key-value dari sheet
-      return Object.fromEntries(remote.map(r => [r.key, r.value]));
+      // Jika remote mengembalikan array objek tunggal (format dari Apps Script)
+      if (Array.isArray(remote) && remote.length > 0) {
+        return remote[0];
+      }
+      // Jika remote berupa array key-value pair
+      if (Array.isArray(remote) && remote[0] && remote[0].key) {
+        return Object.fromEntries(remote.map(r => [r.key, r.value]));
+      }
+      return remote;
     }
     return LOCAL_DATA.profil;
   },
