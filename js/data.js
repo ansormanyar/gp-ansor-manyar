@@ -16,13 +16,13 @@
 const CONFIG = {
   // Ganti dengan Spreadsheet ID kamu
   // Contoh URL: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
-  SPREADSHEET_ID: 'GANTI_DENGAN_SPREADSHEET_ID_KAMU',
+  SPREADSHEET_ID: 'https://docs.google.com/spreadsheets/d/16OXNSXor3m_TXsX1YKyusqn38gEDluB5dCqshs-8rJc/edit',
 
   // Ganti dengan API Key Google Cloud kamu (opsional, untuk Sheets API v4)
   API_KEY: 'GANTI_DENGAN_API_KEY_KAMU',
 
   // Ganti dengan URL Apps Script Web App kamu (pilihan utama, lebih mudah)
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyrehwbVNW2gVXojzMr-UNpamb24mE5hRd4vk9afKxoCyRz38Cw_iVukvVEVdgGmpxi/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzblzahi1_74lW2UVi_zUNPvfQxQ3sa4GcpiHG-2XJBbLrt3fnN5bQ1O8OVNCtGCIoo/exec',
 
   // Mode: 'apps_script' | 'sheets_api' | 'local'
   // Gunakan 'local' dulu sebelum setup Google Sheets
