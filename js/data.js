@@ -1,340 +1,309 @@
 /* ============================================================
-   GP ANSOR MANYAR — Data Layer
-   Sumber: Google Sheets API (realtime) + fallback data lokal
-   ============================================================
-
-   CARA SETUP GOOGLE SHEETS:
-   1. Buat Google Spreadsheet baru
-   2. Buat sheet dengan nama: kegiatan, kegiatan_mendatang,
-      ranting, pengurus_ranting, pengurus_pac, profil
-   3. File → Share → "Anyone with the link" → Viewer
-   4. Extensions → Apps Script → paste kode dari PANDUAN.md
-   5. Deploy sebagai Web App → copy URL ke APPS_SCRIPT_URL di bawah
-   6. Isi SPREADSHEET_ID dari URL spreadsheet kamu
+   GP ANSOR MANYAR — Data Layer v2.0
+   Terhubung ke Google Apps Script sebagai backend
    ============================================================ */
 
 const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw7e6E1qn80aSB3QNAUO0atO-CamKkk-nmwmHkg23PoaGvA8uOnwPW3H5K4gyJMlAr3/exec',
-  MODE: 'apps_script', // <-- ASTIKAN SUDAH DIGANTI DARI 'local' KE 'apps_script'
   CACHE_MINUTES: 10,
 };
 
 /* ============================================================
-   FALLBACK DATA LOKAL
-   Edit bagian ini untuk mengisi konten sementara
-   sebelum Google Sheets terhubung
+   DATA LOKAL — fallback jika koneksi gagal
    ============================================================ */
 
 const LOCAL_DATA = {
 
   profil: {
-    nama_organisasi: 'Pimpinan Anak Cabang Gerakan Pemuda Ansor',
-    kecamatan: 'Manyar',
-    kabupaten: 'Gresik',
-    periode: '2023–2026',
-    visi: 'Terwujudnya Gerakan Pemuda Ansor Manyar yang tangguh, mandiri, dan berdaya guna bagi masyarakat di tengah perkembangan kawasan industri.',
-    misi: [
-      'Memperkuat kaderisasi dan pembinaan anggota secara berkelanjutan',
-      'Mendorong partisipasi aktif pemuda dalam kehidupan sosial, ekonomi, dan keagamaan',
-      'Membangun sinergi dengan seluruh elemen masyarakat dan pemerintah',
-      'Menjaga nilai-nilai Ahlussunnah wal Jamaah An-Nahdliyah',
-    ],
-    jumlah_ranting: 12,
-    jumlah_anggota: '500+',
-    jumlah_kegiatan: '40+',
-    alamat: 'Kecamatan Manyar, Kabupaten Gresik, Jawa Timur',
-    email: 'ansormanyar@gmail.com',
-    whatsapp: '6281234567890',
-    instagram: 'https://instagram.com/ansormanyar',
+    nama_resmi: 'Gerakan Pemuda Ansor Kecamatan Manyar',
+    nama_singkat: 'PAC GP Ansor Manyar',
+    periode_kepengurusan: '2023–2026',
+    tagline: 'Bergerak Bersama, Membangun Bangsa.',
+    visi: 'Terwujudnya Gerakan Pemuda Ansor Manyar yang tangguh, mandiri, dan berdaya guna bagi masyarakat.',
+    misi_1: 'Memperkuat kaderisasi dan pembinaan anggota secara berkelanjutan',
+    misi_2: 'Mendorong partisipasi aktif pemuda dalam kehidupan sosial dan keagamaan',
+    misi_3: 'Menjaga nilai-nilai Ahlussunnah wal Jamaah An-Nahdliyah',
+    stat_ranting: '12',
+    stat_anggota: '500+',
+    stat_kegiatan_per_tahun: '40+',
+    alamat_sekretariat: 'Kecamatan Manyar, Kabupaten Gresik',
+    no_whatsapp: '6281234567890',
+    instagram: 'ansormanyar',
     facebook: 'https://facebook.com/ansormanyar',
     youtube: '',
-  },
-
-  kegiatan_mendatang: {
-    aktif: true,
-    judul: 'Pelantikan & Konsolidasi Anggota Baru GP Ansor Manyar',
-    tanggal: '2025-09-15',
-    waktu: '08.00 WIB',
-    lokasi: 'Pendopo Kecamatan Manyar, Gresik',
-    deskripsi: 'Pelantikan resmi anggota baru sekaligus konsolidasi organisasi menuju program kerja semester kedua. Terbuka untuk seluruh pemuda Nahdliyin se-Kecamatan Manyar.',
-    link_daftar: '#',
-    teks_tombol: 'Daftar Sekarang',
+    tiktok: '',
   },
 
   kegiatan: [
     {
-      id: 1,
-      judul: 'Khataman Al-Qur\'an & Doa Bersama Menyambut HUT RI',
-      tanggal: '2025-08-10',
-      lokasi: 'Masjid Agung Manyar',
-      kategori: 'Keagamaan',
-      deskripsi: 'Kegiatan khataman Al-Qur\'an 30 juz bersama anggota Ansor dan Banser se-kecamatan Manyar sebagai bentuk syukur dalam menyambut HUT ke-80 Kemerdekaan RI.',
-      foto: '',
-      highlight: true,
+      ID: 'KG001',
+      'Judul Kegiatan': 'Khataman Al-Qur\'an Menyambut HUT RI',
+      'Tanggal (YYYY-MM-DD)': '2025-08-10',
+      'Kategori': 'Keagamaan',
+      'Lokasi': 'Masjid Agung Manyar',
+      'Status': 'Selesai',
+      'Deskripsi Singkat': 'Khataman Al-Qur\'an 30 juz bersama anggota Ansor dan Banser se-kecamatan Manyar.',
+      'URL Foto': '',
     },
     {
-      id: 2,
-      judul: 'Bakti Sosial & Donor Darah di Kawasan JIIPE',
-      tanggal: '2025-07-28',
-      lokasi: 'Kawasan Industri JIIPE, Manyar',
-      kategori: 'Sosial',
-      deskripsi: 'Kegiatan donor darah dan pembagian sembako untuk pekerja dan warga sekitar kawasan industri Java Integrated Industrial and Ports Estate (JIIPE).',
-      foto: '',
-      highlight: true,
+      ID: 'KG002',
+      'Judul Kegiatan': 'Bakti Sosial & Donor Darah di JIIPE',
+      'Tanggal (YYYY-MM-DD)': '2025-07-28',
+      'Kategori': 'Sosial',
+      'Lokasi': 'Kawasan JIIPE, Manyar',
+      'Status': 'Selesai',
+      'Deskripsi Singkat': 'Donor darah dan pembagian sembako untuk pekerja dan warga sekitar kawasan industri JIIPE.',
+      'URL Foto': '',
     },
     {
-      id: 3,
-      judul: 'Pelatihan Digital Marketing untuk Pemuda Ansor',
-      tanggal: '2025-07-10',
-      lokasi: 'Aula Kantor Kecamatan Manyar',
-      kategori: 'Pelatihan',
-      deskripsi: 'Workshop digital marketing dan pengelolaan media sosial bagi anggota GP Ansor Manyar untuk mendukung pemberdayaan ekonomi pemuda.',
-      foto: '',
-      highlight: true,
+      ID: 'KG003',
+      'Judul Kegiatan': 'Pelatihan Digital Marketing Pemuda Ansor',
+      'Tanggal (YYYY-MM-DD)': '2025-07-10',
+      'Kategori': 'Pelatihan',
+      'Lokasi': 'Aula Kantor Kecamatan Manyar',
+      'Status': 'Selesai',
+      'Deskripsi Singkat': 'Workshop digital marketing bagi anggota GP Ansor Manyar untuk pemberdayaan ekonomi pemuda.',
+      'URL Foto': '',
     },
+  ],
+
+  banner: [
     {
-      id: 4,
-      judul: 'Gerak Jalan Santri & Pawai Ta\'aruf',
-      tanggal: '2025-06-22',
-      lokasi: 'Alun-alun Manyar',
-      kategori: 'Sosial',
-      deskripsi: 'Partisipasi GP Ansor Manyar dalam gerak jalan santri memperingati Hari Lahir Nahdlatul Ulama bersama ribuan warga Nahdliyin.',
-      foto: '',
-      highlight: false,
-    },
-    {
-      id: 5,
-      judul: 'Kajian Aswaja: Moderasi Beragama di Era Digital',
-      tanggal: '2025-06-05',
-      lokasi: 'Ponpes Al-Hidayah Manyar',
-      kategori: 'Keagamaan',
-      deskripsi: 'Kajian rutin bulanan membahas konsep moderasi beragama Ahlussunnah wal Jamaah dalam menghadapi tantangan digitalisasi.',
-      foto: '',
-      highlight: false,
-    },
-    {
-      id: 6,
-      judul: 'Musyawarah Kerja PAC GP Ansor Manyar 2025',
-      tanggal: '2025-05-18',
-      lokasi: 'Gedung PCNU Gresik',
-      kategori: 'Organisasi',
-      deskripsi: 'Musyawarah kerja tahunan menyusun program prioritas dan evaluasi capaian PAC GP Ansor Manyar semester pertama 2025.',
-      foto: '',
-      highlight: false,
+      ID: 'BN001',
+      'Judul Banner': 'Pelantikan & Konsolidasi Anggota Baru',
+      'Keterangan Singkat': 'GP Ansor Manyar · Terbuka untuk Pemuda Nahdliyin',
+      'Tanggal Acara (YYYY-MM-DD)': '2025-09-15',
+      'Waktu (HH:MM)': '08:00',
+      'Lokasi': 'Pendopo Kecamatan Manyar',
+      'Status': 'Aktif',
     },
   ],
 
   ranting: [
-    { id: 'r01', nama: 'PR Manyar', desa: 'Desa Manyar Sidomukti', ketua: 'Ahmad Fauzi', aktif: true },
-    { id: 'r02', nama: 'PR Roomo', desa: 'Desa Roomo', ketua: 'M. Habibi', aktif: true },
-    { id: 'r03', nama: 'PR Leran', desa: 'Desa Leran', ketua: 'Syaifuddin', aktif: true },
-    { id: 'r04', nama: 'PR Sukomulyo', desa: 'Desa Sukomulyo', ketua: 'Abdul Ghofur', aktif: true },
-    { id: 'r05', nama: 'PR Yosowilangun', desa: 'Desa Yosowilangun', ketua: 'Hendra Saputra', aktif: true },
-    { id: 'r06', nama: 'PR Banyuwangi', desa: 'Desa Banyuwangi', ketua: 'Rudi Hartono', aktif: true },
-    { id: 'r07', nama: 'PR Betiting', desa: 'Desa Betiting', ketua: 'Zainul Arifin', aktif: true },
-    { id: 'r08', nama: 'PR Pongangan', desa: 'Desa Pongangan', ketua: 'M. Khoirul Anwar', aktif: true },
-    { id: 'r09', nama: 'PR Sumberrejo', desa: 'Desa Sumberrejo', ketua: 'Agus Salim', aktif: true },
-    { id: 'r10', nama: 'PR Peganden', desa: 'Desa Peganden', ketua: 'Wahyu Hidayat', aktif: true },
-    { id: 'r11', nama: 'PR Sembayat', desa: 'Desa Sembayat', ketua: 'Fathur Rahman', aktif: true },
-    { id: 'r12', nama: 'PR Manyarejo', desa: 'Desa Manyarejo', ketua: 'Lukman Hakim', aktif: true },
+    { ID:'RT001','Nama Desa/Kelurahan':'Desa Manyar Sidomukti','Nama Ranting Resmi':'PR GP Ansor Manyar','Ketua Ranting':'Ahmad Fauzi','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'45','Tahun Berdiri':'2013','Status':'Aktif','Keterangan':'' },
+    { ID:'RT002','Nama Desa/Kelurahan':'Desa Roomo','Nama Ranting Resmi':'PR GP Ansor Roomo','Ketua Ranting':'M. Habibi','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'38','Tahun Berdiri':'2014','Status':'Aktif','Keterangan':'' },
+    { ID:'RT003','Nama Desa/Kelurahan':'Desa Leran','Nama Ranting Resmi':'PR GP Ansor Leran','Ketua Ranting':'Syaifuddin','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'42','Tahun Berdiri':'2012','Status':'Aktif','Keterangan':'' },
+    { ID:'RT004','Nama Desa/Kelurahan':'Desa Sukomulyo','Nama Ranting Resmi':'PR GP Ansor Sukomulyo','Ketua Ranting':'Abdul Ghofur','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'50','Tahun Berdiri':'2011','Status':'Aktif','Keterangan':'' },
+    { ID:'RT005','Nama Desa/Kelurahan':'Desa Yosowilangun','Nama Ranting Resmi':'PR GP Ansor Yosowilangun','Ketua Ranting':'Hendra Saputra','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'35','Tahun Berdiri':'2015','Status':'Aktif','Keterangan':'' },
+    { ID:'RT006','Nama Desa/Kelurahan':'Desa Banyuwangi','Nama Ranting Resmi':'PR GP Ansor Banyuwangi','Ketua Ranting':'Rudi Hartono','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'40','Tahun Berdiri':'2014','Status':'Aktif','Keterangan':'' },
+    { ID:'RT007','Nama Desa/Kelurahan':'Desa Betiting','Nama Ranting Resmi':'PR GP Ansor Betiting','Ketua Ranting':'Zainul Arifin','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'33','Tahun Berdiri':'2016','Status':'Aktif','Keterangan':'' },
+    { ID:'RT008','Nama Desa/Kelurahan':'Desa Pongangan','Nama Ranting Resmi':'PR GP Ansor Pongangan','Ketua Ranting':'M. Khoirul Anwar','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'28','Tahun Berdiri':'2017','Status':'Aktif','Keterangan':'' },
+    { ID:'RT009','Nama Desa/Kelurahan':'Desa Sumberrejo','Nama Ranting Resmi':'PR GP Ansor Sumberrejo','Ketua Ranting':'Agus Salim','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'36','Tahun Berdiri':'2013','Status':'Aktif','Keterangan':'' },
+    { ID:'RT010','Nama Desa/Kelurahan':'Desa Peganden','Nama Ranting Resmi':'PR GP Ansor Peganden','Ketua Ranting':'Wahyu Hidayat','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'31','Tahun Berdiri':'2015','Status':'Aktif','Keterangan':'' },
+    { ID:'RT011','Nama Desa/Kelurahan':'Desa Sembayat','Nama Ranting Resmi':'PR GP Ansor Sembayat','Ketua Ranting':'Fathur Rahman','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'44','Tahun Berdiri':'2012','Status':'Aktif','Keterangan':'' },
+    { ID:'RT012','Nama Desa/Kelurahan':'Desa Manyarejo','Nama Ranting Resmi':'PR GP Ansor Manyarejo','Ketua Ranting':'Lukman Hakim','No. HP Ketua':'','Sekretaris':'','Bendahara':'','Jumlah Anggota':'39','Tahun Berdiri':'2014','Status':'Aktif','Keterangan':'' },
   ],
 
-  pengurus_ranting: {
-    // id_ranting: [ { nama, jabatan, foto } ]
-    r01: [
-      { nama: 'Ahmad Fauzi', jabatan: 'Ketua', foto: '' },
-      { nama: 'M. Irkham', jabatan: 'Wakil Ketua', foto: '' },
-      { nama: 'Sholeh Amin', jabatan: 'Sekretaris', foto: '' },
-      { nama: 'Rizal Maulana', jabatan: 'Bendahara', foto: '' },
-    ],
-    // Ranting lain bisa diisi serupa
-  },
-
-  pengurus_pac: [
-    // Pimpinan Inti
-    { nama: 'H. Abdullah Mas\'ud', jabatan: 'Ketua', departemen: 'Pimpinan Inti', urutan: 1, foto: '', tipe: 'ketua' },
-    { nama: 'M. Syaifullah', jabatan: 'Wakil Ketua I', departemen: 'Pimpinan Inti', urutan: 2, foto: '', tipe: 'wk' },
-    { nama: 'Agus Wahyudi', jabatan: 'Wakil Ketua II', departemen: 'Pimpinan Inti', urutan: 3, foto: '', tipe: 'wk' },
-    { nama: 'Nur Hasan', jabatan: 'Wakil Ketua III', departemen: 'Pimpinan Inti', urutan: 4, foto: '', tipe: 'wk' },
-    { nama: 'M. Iqbal Fauzi', jabatan: 'Sekretaris', departemen: 'Pimpinan Inti', urutan: 5, foto: '', tipe: 'sekret' },
-    { nama: 'Rizal Kurniawan', jabatan: 'Wakil Sekretaris', departemen: 'Pimpinan Inti', urutan: 6, foto: '', tipe: 'sekret' },
-    { nama: 'Khoirul Umam', jabatan: 'Bendahara', departemen: 'Pimpinan Inti', urutan: 7, foto: '', tipe: 'bendahara' },
-    { nama: 'M. Fahrur Rozi', jabatan: 'Wakil Bendahara', departemen: 'Pimpinan Inti', urutan: 8, foto: '', tipe: 'bendahara' },
-    // Departemen
-    { nama: 'Imam Syafi\'i', jabatan: 'Ketua Dept. Kaderisasi', departemen: 'Kaderisasi', urutan: 9, foto: '', tipe: 'dept' },
-    { nama: 'Fathul Bari', jabatan: 'Ketua Dept. Keagamaan', departemen: 'Keagamaan', urutan: 10, foto: '', tipe: 'dept' },
-    { nama: 'Hendra Prasetyo', jabatan: 'Ketua Dept. Sosial', departemen: 'Sosial', urutan: 11, foto: '', tipe: 'dept' },
-    { nama: 'Yusuf Hidayatullah', jabatan: 'Ketua Dept. Media', departemen: 'Media & Komunikasi', urutan: 12, foto: '', tipe: 'dept' },
+  pengurus: [
+    { ID:'PG001','Nama Lengkap':'H. Abdullah Mas\'ud','Jabatan':'Ketua','Bidang/Departemen':'Pengurus Inti','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG002','Nama Lengkap':'M. Syaifullah','Jabatan':'Wakil Ketua I','Bidang/Departemen':'Pengurus Inti','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG003','Nama Lengkap':'Agus Wahyudi','Jabatan':'Wakil Ketua II','Bidang/Departemen':'Pengurus Inti','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG004','Nama Lengkap':'M. Iqbal Fauzi','Jabatan':'Sekretaris','Bidang/Departemen':'Pengurus Inti','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG005','Nama Lengkap':'Khoirul Umam','Jabatan':'Bendahara','Bidang/Departemen':'Pengurus Inti','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG006','Nama Lengkap':'Imam Syafi\'i','Jabatan':'Ketua Bidang','Bidang/Departemen':'Kaderisasi','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG007','Nama Lengkap':'Fathul Bari','Jabatan':'Ketua Bidang','Bidang/Departemen':'Dakwah & Pengembangan Agama','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
+    { ID:'PG008','Nama Lengkap':'Yusuf Hidayatullah','Jabatan':'Ketua Bidang','Bidang/Departemen':'Informasi & Komunikasi','No. HP':'','Periode':'2023–2026','Asal Ranting/Desa':'','URL Foto (opsional)':'' },
   ],
 
 };
 
 /* ============================================================
-   GOOGLE SHEETS FETCHER
+   CACHE — sessionStorage agar tidak fetch berulang
    ============================================================ */
 
-const SheetsDB = {
-
-  // Cache sederhana di sessionStorage
-  _cache: {},
-
-  _cacheKey(sheet) {
-    return `gpa_cache_${sheet}`;
-  },
-
-  _getCache(sheet) {
+const Cache = {
+  get(key) {
     try {
-      const raw = sessionStorage.getItem(this._cacheKey(sheet));
+      const raw = sessionStorage.getItem('gpa_' + key);
       if (!raw) return null;
-      const { data, timestamp } = JSON.parse(raw);
-      const age = (Date.now() - timestamp) / 60000;
-      if (age > CONFIG.CACHE_MINUTES) return null;
+      const { data, ts } = JSON.parse(raw);
+      if ((Date.now() - ts) / 60000 > CONFIG.CACHE_MINUTES) return null;
       return data;
     } catch { return null; }
   },
-
-  _setCache(sheet, data) {
+  set(key, data) {
     try {
-      sessionStorage.setItem(this._cacheKey(sheet), JSON.stringify({
-        data, timestamp: Date.now()
-      }));
+      sessionStorage.setItem('gpa_' + key, JSON.stringify({ data, ts: Date.now() }));
     } catch {}
   },
-
-  // Fetch via Apps Script (mode utama)
-  async _fetchAppsScript(sheet) {
-    const cached = this._getCache(sheet);
-    if (cached) return cached;
-
-    const url = `${CONFIG.APPS_SCRIPT_URL}?sheet=${sheet}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    this._setCache(sheet, data);
-    return data;
-  },
-
-  // Fetch via Sheets API v4
-  async _fetchSheetsAPI(sheet) {
-    const cached = this._getCache(sheet);
-    if (cached) return cached;
-
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${sheet}?key=${CONFIG.API_KEY}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-
-    // Konversi rows → array of objects
-    const [headers, ...rows] = json.values || [];
-    const data = rows.map(row =>
-      Object.fromEntries(headers.map((h, i) => [h.trim(), (row[i] || '').trim()]))
-    );
-    this._setCache(sheet, data);
-    return data;
-  },
-
-  async fetch(sheet) {
-    if (CONFIG.MODE === 'local') return null;
-    try {
-      if (CONFIG.MODE === 'apps_script') return await this._fetchAppsScript(sheet);
-      if (CONFIG.MODE === 'sheets_api') return await this._fetchSheetsAPI(sheet);
-    } catch (err) {
-      console.warn(`[GP Ansor] Gagal fetch sheet "${sheet}":`, err.message);
-      console.warn('[GP Ansor] Menggunakan data lokal sebagai fallback.');
-      return null;
-    }
-    return null;
-  },
-
 };
 
 /* ============================================================
-   DATA API — digunakan oleh main.js dan halaman lain
-   Selalu kembalikan data lokal jika sheets gagal/belum setup
+   SHEETS FETCHER — satu call readAll untuk semua data
+   ============================================================ */
+
+const SheetsDB = {
+  _all: null,
+
+  async fetchAll() {
+    if (this._all) return this._all;
+
+    const cached = Cache.get('all');
+    if (cached) { this._all = cached; return cached; }
+
+    try {
+      const url  = CONFIG.APPS_SCRIPT_URL + '?action=readAll';
+      const res  = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+
+      // Simpan dalam format yang mudah diakses
+      const result = {
+        profil:   json.profil?.data   || {},
+        kegiatan: json.kegiatan?.data || [],
+        banner:   json.banner?.data   || [],
+        ranting:  json.ranting?.data  || [],
+        pengurus: json.pengurus?.data || [],
+      };
+
+      Cache.set('all', result);
+      this._all = result;
+      return result;
+
+    } catch (err) {
+      console.warn('[GP Ansor] Gagal fetch dari Sheets, pakai data lokal:', err.message);
+      return null;
+    }
+  },
+};
+
+/* ============================================================
+   AnsorData — API yang dipakai oleh main.js dan halaman lain
    ============================================================ */
 
 const AnsorData = {
 
- async getProfil() {
-    const remote = await SheetsDB.fetch('profil');
-    if (remote) {
-      // Jika remote mengembalikan array objek tunggal (format dari Apps Script)
-      if (Array.isArray(remote) && remote.length > 0) {
-        return remote[0];
-      }
-      // Jika remote berupa array key-value pair
-      if (Array.isArray(remote) && remote[0] && remote[0].key) {
-        return Object.fromEntries(remote.map(r => [r.key, r.value]));
-      }
-      return remote;
-    }
-    return LOCAL_DATA.profil;
+  async _db() {
+    return await SheetsDB.fetchAll();
   },
 
+  async getProfil() {
+    const db = await this._db();
+    const p  = db?.profil || {};
+    // Jika ada data dari Sheets, pakai. Kalau tidak, fallback lokal.
+    return Object.keys(p).length > 2 ? p : LOCAL_DATA.profil;
+  },
+
+  // Banner mendatang — ambil yang Status=Aktif, paling dekat tanggalnya
+  async getBannerAktif() {
+    const db      = await this._db();
+    const banners = db?.banner || LOCAL_DATA.banner;
+    const aktif   = banners
+      .filter(b => b['Status'] === 'Aktif')
+      .sort((a, b) => new Date(a['Tanggal Acara (YYYY-MM-DD)']) - new Date(b['Tanggal Acara (YYYY-MM-DD)']));
+    return aktif[0] || null;
+  },
+
+  // Kompatibilitas dengan main.js lama
   async getKegiatanMendatang() {
-    const remote = await SheetsDB.fetch('kegiatan_mendatang');
-    if (remote && remote.length > 0) {
-      const r = remote[0];
-      return {
-        aktif: r.aktif === 'TRUE' || r.aktif === '1',
-        judul: r.judul,
-        tanggal: r.tanggal,
-        waktu: r.waktu,
-        lokasi: r.lokasi,
-        deskripsi: r.deskripsi,
-        link_daftar: r.link_daftar,
-        teks_tombol: r.teks_tombol || 'Selengkapnya',
-      };
-    }
-    return LOCAL_DATA.kegiatan_mendatang;
+    const banner = await this.getBannerAktif();
+    if (!banner) return { aktif: false };
+    return {
+      aktif: true,
+      judul: banner['Judul Banner'],
+      tanggal: banner['Tanggal Acara (YYYY-MM-DD)'],
+      waktu: banner['Waktu (HH:MM)'],
+      lokasi: banner['Lokasi'],
+      deskripsi: banner['Keterangan Singkat'],
+      link_daftar: '#',
+      teks_tombol: 'Selengkapnya',
+    };
   },
 
   async getKegiatan({ highlight = false, limit = 0 } = {}) {
-    const remote = await SheetsDB.fetch('kegiatan');
-    let data = remote || LOCAL_DATA.kegiatan;
+    const db   = await this._db();
+    let data   = db?.kegiatan || LOCAL_DATA.kegiatan;
 
-    // Normalisasi tipe boolean
-    data = data.map(k => ({
-      ...k,
-      highlight: k.highlight === true || k.highlight === 'TRUE' || k.highlight === '1',
-    }));
-
-    if (highlight) data = data.filter(k => k.highlight);
     // Urutkan terbaru dulu
-    data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+    data = [...data].sort((a, b) =>
+      new Date(b['Tanggal (YYYY-MM-DD)'] || b.tanggal || 0) -
+      new Date(a['Tanggal (YYYY-MM-DD)'] || a.tanggal || 0)
+    );
+
+    // highlight: ambil 3 teratas (belum ada kolom highlight di sheet baru)
+    if (highlight) data = data.slice(0, 3);
     if (limit > 0) data = data.slice(0, limit);
-    return data;
+
+    // Normalisasi key agar main.js lama tetap bisa pakai
+    return data.map(k => ({
+      id:         k.ID          || k.id,
+      judul:      k['Judul Kegiatan'] || k.judul,
+      tanggal:    k['Tanggal (YYYY-MM-DD)'] || k.tanggal,
+      kategori:   k['Kategori'] || k.kategori || 'Kegiatan',
+      lokasi:     k['Lokasi']   || k.lokasi,
+      status:     k['Status']   || k.status,
+      deskripsi:  k['Deskripsi Singkat'] || k.deskripsi,
+      foto:       k['URL Foto'] || k.foto || '',
+      highlight:  true,
+    }));
   },
 
   async getRanting() {
-    const remote = await SheetsDB.fetch('ranting');
-    let data = remote || LOCAL_DATA.ranting;
-    return data.map(r => ({
-      ...r,
-      aktif: r.aktif === true || r.aktif === 'TRUE' || r.aktif === '1',
-    })).filter(r => r.aktif);
+    const db   = await this._db();
+    const data = db?.ranting || LOCAL_DATA.ranting;
+
+    return data
+      .filter(r => (r['Status'] || r.status || r.aktif) === 'Aktif' || r.aktif === true)
+      .map(r => ({
+        id:     r.ID   || r.id,
+        nama:   r['Nama Ranting Resmi'] || r.nama,
+        desa:   r['Nama Desa/Kelurahan'] || r.desa,
+        ketua:  r['Ketua Ranting'] || r.ketua,
+        hp:     r['No. HP Ketua'] || '',
+        aktif:  true,
+      }));
   },
 
   async getPengurusRanting(idRanting) {
-    const remote = await SheetsDB.fetch('pengurus_ranting');
-    if (remote) {
-      return remote.filter(p => p.id_ranting === idRanting);
-    }
-    return LOCAL_DATA.pengurus_ranting[idRanting] || [];
+    const db   = await this._db();
+    const data = db?.ranting || LOCAL_DATA.ranting;
+    const r    = data.find(x => x.ID === idRanting || x.id === idRanting);
+    if (!r) return [];
+    const hasil = [];
+    if (r['Ketua Ranting'])  hasil.push({ nama: r['Ketua Ranting'],  jabatan: 'Ketua' });
+    if (r['Sekretaris'])     hasil.push({ nama: r['Sekretaris'],     jabatan: 'Sekretaris' });
+    if (r['Bendahara'])      hasil.push({ nama: r['Bendahara'],      jabatan: 'Bendahara' });
+    return hasil;
   },
 
   async getPengurusPAC({ limit = 0 } = {}) {
-    const remote = await SheetsDB.fetch('pengurus_pac');
-    let data = remote || LOCAL_DATA.pengurus_pac;
-    data.sort((a, b) => Number(a.urutan) - Number(b.urutan));
-    if (limit > 0) data = data.slice(0, limit);
-    return data;
+    const db   = await this._db();
+    const data = db?.pengurus || LOCAL_DATA.pengurus;
+
+    // Urutan: Pengurus Inti dulu, lalu bidang lain
+    const urutan = { 'Pengurus Inti': 0 };
+    const sorted = [...data].sort((a, b) => {
+      const ba = a['Bidang/Departemen'] || '';
+      const bb = b['Bidang/Departemen'] || '';
+      return (urutan[ba] ?? 1) - (urutan[bb] ?? 1);
+    });
+
+    const hasil = sorted.map((p, i) => ({
+      id:          p.ID || ('pg' + i),
+      nama:        p['Nama Lengkap'] || p.nama,
+      jabatan:     p['Jabatan']      || p.jabatan,
+      departemen:  p['Bidang/Departemen'] || p.departemen,
+      foto:        p['URL Foto (opsional)'] || p.foto || '',
+      urutan:      i,
+      // tipe untuk renderPengurusCard di main.js lama
+      tipe: (() => {
+        const j = (p['Jabatan'] || '').toLowerCase();
+        if (j.includes('ketua') && !j.includes('wakil') && !j.includes('bidang')) return 'ketua';
+        if (j.includes('wakil ketua')) return 'wk';
+        if (j.includes('sekretaris')) return 'sekret';
+        if (j.includes('bendahara')) return 'bendahara';
+        return 'dept';
+      })(),
+    }));
+
+    return limit > 0 ? hasil.slice(0, limit) : hasil;
   },
 
 };
 
 /* ============================================================
-   HELPERS
+   HELPERS — sama persis dengan versi lama
    ============================================================ */
 
 const Fmt = {
