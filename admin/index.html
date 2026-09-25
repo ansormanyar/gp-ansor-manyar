@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — GP Ansor Manyar</title>
+<style>
+:root{
+  --h:#1a7a3c;--hd:#125a2c;--hm:#e8f5ee;
+  --g:#c8993a;--gm:#fdf6e3;
+  --bg:#f4f6f8;--w:#fff;
+  --tx:#1a1f2e;--ts:#4b5563;--tm:#9ca3af;
+  --br:#e5e7eb;--r:9px;
+  --red:#dc2626;--redm:#fef2f2;
+  --blue:#1d4ed8;--bluem:#eff6ff;
+  --sw:248px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+#sb{width:var(--sw);background:var(--hd);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform .22s ease}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-logo{width:38px;height:38px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:var(--hd);flex-shrink:0}
+.sb-brand h1{font-size:13px;font-weight:700;line-height:1.25}
+.sb-brand p{font-size:11px;opacity:.55;margin-top:1px}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;opacity:.4;padding:12px 16px 4px}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 16px;width:100%;background:none;border:none;color:#fff;font-size:13px;font-weight:500;cursor:pointer;opacity:.72;transition:all .14s;text-align:left}
+.nav-btn:hover{background:rgba(255,255,255,.08);opacity:1}
+.nav-btn.on{background:rgba(255,255,255,.14);opacity:1;border-right:3px solid var(--g)}
+.nav-btn .ic{font-size:15px;width:20px;text-align:center}
+.sb-foot{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.sb-foot a{color:rgba(255,255,255,.55);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:6px}
+.sb-foot a:hover{color:#fff}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column}
+#topbar{background:var(--w);border-bottom:1px solid var(--br);height:54px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tb-left{display:flex;align-items:center;gap:10px}
+#menu-tog{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx);padding:4px}
+#pg-title{font-size:15px;font-weight:700}
+.conn-pill{font-size:11px;font-weight:700;padding:3px 11px;border-radius:99px;cursor:default}
+.pill-ok{background:#dcfce7;color:#166534}
+.pill-err{background:var(--redm);color:var(--red)}
+.pill-wait{background:#fef9c3;color:#713f12}
+#content{padding:22px;flex:1}
+
+/* ── SECTIONS ── */
+.sec{display:none}.sec.on{display:block}
+
+/* ── CARD ── */
+.card{background:var(--w);border:1px solid var(--br);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ch{padding:14px 18px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ct{font-size:13px;font-weight:700}
+.cb{padding:18px}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--w);border:1px solid var(--br);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-ic{font-size:20px;margin-bottom:7px}
+.stat-v{font-size:26px;font-weight:800;color:var(--h)}
+.stat-l{font-size:11px;color:var(--tm);margin-top:2px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .13s;line-height:1;font-family:inherit}
+.btn-p{background:var(--h);color:#fff}.btn-p:hover{background:var(--hd)}
+.btn-g{background:var(--g);color:#fff}.btn-g:hover{background:#a87c28}
+.btn-o{background:transparent;color:var(--h);border:1.5px solid var(--h)}.btn-o:hover{background:var(--hm)}
+.btn-r{background:var(--red);color:#fff}.btn-r:hover{background:#b91c1c}
+.btn-gh{background:transparent;color:var(--ts);border:1.5px solid var(--br)}.btn-gh:hover{background:var(--bg)}
+.btn-sm{padding:5px 9px;font-size:11px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── FORM ── */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--ts);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.fc{width:100%;padding:8px 11px;border:1.5px solid var(--br);border-radius:7px;font-size:13px;color:var(--tx);background:var(--w);font-family:inherit;transition:border-color .13s}
+.fc:focus{outline:none;border-color:var(--h);box-shadow:0 0 0 3px rgba(26,122,60,.1)}
+textarea.fc{resize:vertical;min-height:72px}
+.fh{font-size:11px;color:var(--tm);margin-top:3px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.fc-full{grid-column:1/-1}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 11px;text-align:left;font-size:10px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.05em;background:var(--bg);border-bottom:1px solid var(--br)}
+tbody td{padding:10px 11px;border-bottom:1px solid var(--br);font-size:12px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--hm)}
+.tda{display:flex;gap:5px;white-space:nowrap}
+
+/* ── BADGE ── */
+.bx{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.bx-g{background:#dcfce7;color:#166534}
+.bx-y{background:#fef9c3;color:#713f12}
+.bx-r{background:#fee2e2;color:#991b1b}
+.bx-b{background:#dbeafe;color:var(--blue)}
+.bx-p{background:#ede9fe;color:#5b21b6}
+.bx-gr{background:#f3f4f6;color:#374151}
+
+/* ── MODAL ── */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:200;align-items:center;justify-content:center;padding:16px}
+.mbg.on{display:flex}
+.modal{background:var(--w);border-radius:12px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.mh{padding:16px 18px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--w);z-index:1}
+.mt{font-size:14px;font-weight:700}
+.mc{background:none;border:none;font-size:20px;cursor:pointer;color:var(--tm);padding:2px 5px;border-radius:5px;line-height:1}
+.mc:hover{background:var(--bg)}
+.mb{padding:18px}
+.mf{padding:12px 18px;border-top:1px solid var(--br);display:flex;justify-content:flex-end;gap:8px}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--tx);color:#fff;padding:9px 15px;border-radius:8px;font-size:12px;font-weight:500;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:tin .18s ease;display:flex;align-items:center;gap:7px}
+.toast.ok{background:var(--hd)}.toast.err{background:var(--red)}.toast.warn{background:#92400e}
+@keyframes tin{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:36px 20px;color:var(--ts)}
+.empty .ei{font-size:32px;margin-bottom:8px}
+.empty h3{font-size:13px;font-weight:700;color:var(--tx)}
+.empty p{font-size:11px;margin-top:3px}
+
+/* ── ALERT ── */
+.alert{border-radius:8px;padding:11px 14px;font-size:12px;margin-bottom:14px;display:flex;gap:9px;align-items:flex-start;line-height:1.5}
+.al-i{background:var(--bluem);color:var(--blue);border-left:3px solid var(--blue)}
+.al-w{background:var(--gm);color:#78350f;border-left:3px solid var(--g)}
+.al-s{background:var(--hm);color:var(--hd);border-left:3px solid var(--h)}
+
+/* ── LOADING OVERLAY ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row td{text-align:center;padding:24px;color:var(--ts)}
+
+/* ── LOGIN ── */
+#login{display:none;position:fixed;inset:0;background:var(--hd);z-index:999;align-items:center;justify-content:center}
+#login.on{display:flex}
+.lbox{background:var(--w);border-radius:14px;padding:32px 28px;width:100%;max-width:340px;text-align:center}
+.l-logo{width:52px;height:52px;background:var(--g);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:var(--hd)}
+.lbox h2{font-size:17px;font-weight:800}
+.lbox p{font-size:12px;color:var(--ts);margin:4px 0 22px}
+.lerr{font-size:11px;color:var(--red);background:var(--redm);border-radius:6px;padding:7px 11px;margin-bottom:10px;display:none}
+.lerr.on{display:block}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--br);margin-bottom:18px}
+.tab{padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--ts);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .13s;font-family:inherit}
+.tab.on{color:var(--h);border-bottom-color:var(--h)}
+.tp{display:none}.tp.on{display:block}
+
+/* ── KONEKSI ── */
+.kstep{display:flex;gap:12px;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px}
+.knum{width:24px;height:24px;background:var(--h);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px}
+.kstep h4{font-size:12px;font-weight:700}
+.kstep p{font-size:11px;color:var(--ts);margin-top:2px}
+.conn-row{display:flex;align-items:center;gap:9px;padding:10px 14px;background:var(--bg);border-radius:8px;margin-top:12px}
+.cdot{width:9px;height:9px;border-radius:50%;background:#d1d5db;flex-shrink:0}
+.cdot.ok{background:#22c55e;box-shadow:0 0 0 3px #dcfce7}
+.cdot.err{background:var(--red);box-shadow:0 0 0 3px #fee2e2}
+.cdot.ld{background:var(--g);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── BANNER PREVIEW ── */
+.bp{border:2px solid var(--g);border-radius:9px;padding:12px 14px;background:var(--gm);margin-bottom:8px}
+.bp-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--g)}
+.bp-t{font-size:14px;font-weight:800;color:var(--tx);margin-top:2px}
+.bp-s{font-size:11px;color:var(--ts);margin-top:1px}
+.bp-m{font-size:10px;color:var(--tm);margin-top:6px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #sb{transform:translateX(-100%)}
+  #sb.on{transform:none}
+  #main{margin-left:0}
+  #menu-tog{display:block}
+  .fg2,.fg3{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="on">
+  <div class="lbox">
+    <div class="l-logo">A</div>
+    <h2>GP Ansor Manyar</h2>
+    <p>Panel Admin · Masuk untuk melanjutkan</p>
+    <div class="lerr" id="lerr">Password salah. Coba lagi.</div>
+    <div class="fg" style="text-align:left">
+      <label class="fl">Password</label>
+      <input type="password" class="fc" id="lpass" placeholder="Masukkan password…" style="margin-bottom:10px"/>
+      <button class="btn btn-p" style="width:100%" onclick="doLogin()">Masuk →</button>
+    </div>
+    <p style="font-size:10px;color:var(--tm);margin-top:10px">Password default: <strong>ansormanyar2024</strong></p>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav id="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">A</div>
+    <div><h1>Panel Admin</h1><p>GP Ansor Manyar</p></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-sec">Utama</div>
+    <button class="nav-btn on" onclick="go('dashboard')"><span class="ic">🏠</span>Dashboard</button>
+    <button class="nav-btn" onclick="go('koneksi')"><span class="ic">🔗</span>Koneksi Sheets</button>
+    <div class="sb-sec">Konten Website</div>
+    <button class="nav-btn" onclick="go('profil')"><span class="ic">⚙️</span>Profil Organisasi</button>
+    <button class="nav-btn" onclick="go('kegiatan')"><span class="ic">📅</span>Kegiatan</button>
+    <button class="nav-btn" onclick="go('banner')"><span class="ic">📢</span>Banner Mendatang</button>
+    <button class="nav-btn" onclick="go('ranting')"><span class="ic">🕌</span>Data Ranting</button>
+    <button class="nav-btn" onclick="go('pengurus')"><span class="ic">👥</span>Pengurus PAC</button>
+    <div class="sb-sec">Akun</div>
+    <button class="nav-btn" onclick="go('sandi')"><span class="ic">🔒</span>Ganti Password</button>
+    <button class="nav-btn" onclick="doLogout()"><span class="ic">🚪</span>Keluar</button>
+  </div>
+  <div class="sb-foot"><a href="https://ansormanyar.github.io/gp-ansor-manyar/" target="_blank">← Lihat Website</a></div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-left">
+      <button id="menu-tog" onclick="togSB()">☰</button>
+      <span id="pg-title">Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="conn-pill pill-wait" id="cpill">⏳ Menghubungkan…</span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="sec on" id="sec-dashboard">
+      <div class="stats">
+        <div class="stat"><div class="stat-ic">🕌</div><div class="stat-v" id="st-r">—</div><div class="stat-l">Ranting Aktif</div></div>
+        <div class="stat"><div class="stat-ic">👥</div><div class="stat-v" id="st-p">—</div><div class="stat-l">Pengurus PAC</div></div>
+        <div class="stat"><div class="stat-ic">📅</div><div class="stat-v" id="st-k">—</div><div class="stat-l">Total Kegiatan</div></div>
+        <div class="stat"><div class="stat-ic">📢</div><div class="stat-v" id="st-b">—</div><div class="stat-l">Banner Aktif</div></div>
+      </div>
+      <div class="alert al-s" id="dash-info" style="display:none"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="ch"><span class="ct">Kegiatan Terbaru</span><button class="btn btn-o btn-sm" onclick="go('kegiatan')">Kelola</button></div>
+          <div class="cb" id="dash-kg"><div class="empty"><div class="ei">📅</div><h3>Memuat…</h3></div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">Banner Aktif</span><button class="btn btn-o btn-sm" onclick="go('banner')">Kelola</button></div>
+          <div class="cb" id="dash-bn"><div class="empty"><div class="ei">📢</div><h3>Memuat…</h3></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KONEKSI -->
+    <div class="sec" id="sec-koneksi">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="card">
+          <div class="ch"><span class="ct">🔗 Status Koneksi</span></div>
+          <div class="cb">
+            <div class="conn-row"><div class="cdot" id="cdot"></div><span id="ctext" style="font-size:12px">Menghubungkan ke Google Sheets…</span></div>
+            <div style="margin-top:14px;font-size:12px;color:var(--ts)">
+              <strong>Apps Script URL:</strong><br>
+              <code style="font-size:10px;word-break:break-all;background:var(--bg);padding:4px 8px;border-radius:5px;display:block;margin-top:4px">https://script.google.com/macros/s/AKfycbw7e6E1qn80aSB3QNAUO0atO-CamKkk-nmwmHkg23PoaGvA8uOnwPW3H5K4gyJMlAr3/exec</code>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-o" onclick="testKoneksi()">🔄 Uji Koneksi</button>
+              <button class="btn btn-p" onclick="loadAll()">↓ Muat Ulang Data</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">📋 Panduan</span></div>
+          <div class="cb">
+            <div class="kstep"><div class="knum">1</div><div><h4>Apps Script sudah terpasang</h4><p>Script terhubung ke Spreadsheet ID yang benar.</p></div></div>
+            <div class="kstep"><div class="knum">2</div><div><h4>Edit data dari panel ini</h4><p>Semua perubahan langsung tersimpan ke Google Sheets.</p></div></div>
+            <div class="kstep"><div class="knum">3</div><div><h4>Website membaca otomatis</h4><p>Setiap ada perubahan, website akan menampilkan data terbaru.</p></div></div>
+            <div class="kstep"><div class="knum">4</div><div><h4>Jika koneksi error</h4><p>Deploy ulang Apps Script → Deploy → Manage deployments → buat versi baru.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFIL -->
+    <div class="sec" id="sec-profil">
+      <div class="tabs">
+        <button class="tab on" onclick="stab('profil','id',this)">Identitas</button>
+        <button class="tab" onclick="stab('profil','kt',this)">Kontak & Medsos</button>
+        <button class="tab" onclick="stab('profil','st',this)">Statistik Beranda</button>
+      </div>
+      <div class="tp on" id="profil-id">
+        <div class="card">
+          <div class="ch"><span class="ct">Identitas Organisasi</span><button class="btn btn-p" onclick="saveProfil()" id="btn-saveprofil">💾 Simpan ke Sheets</button></div>
+          <div class="cb">
+            <div class="fg2">
+              <div class="fg"><label class="fl">Nama Resmi</label><input class="fc" id="p-nama_resmi"/></div>
+              <div class="fg"><label class="fl">Nama Singkat</label><input class="fc" id="p-nama_singkat"/></div>
+              <div class="fg"><label class="fl">Periode Kepengurusan</label><input class="fc" id="p-periode_kepengurusan" placeholder="2023–2026"/></div>
+              <div class="fg"><label class="fl">Tahun Berdiri</label><input class="fc" id="p-tahun_berdiri" placeholder="2010"/></div>
+              <div class="fg fc-full"><label class="fl">Alamat Sekretariat</label><input class="fc" id="p-alamat_sekretariat"/></div>
+              <div class="fg fc-full"><label class="fl">Tagline / Slogan</label><input class="fc" id="p-tagline"/></div>
+            </div>
+            <div class="fg"><label class="fl">Visi</label><textarea class="fc" id="p-visi" rows="3"></textarea></div>
+            <div class="fg"><label class="fl">Misi 1</label><input class="fc" id="p-misi_1"/></div>
+            <div class="fg"><label class="fl">Misi 2</label><input class="fc" id="p-misi_2"/></div>
+            <div class="fg"><label class="fl">Misi 3</label><input class="fc" id="p-misi_3"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="tp" id="profil-kt">
+        <div class="card">
+          <div class="ch"><span class="ct">Kontak & Media Sosial</span><button class="btn btn-p" onclick="saveProfil()">💾 Simpan ke Sheets</button></div>
+          <div class="cb">
+            <div class="fg2">
+              <div class="fg"><label class="fl">No. WhatsApp</label><input class="fc" id="p-no_whatsapp" placeholder="628123456789"/><p class="fh">Format: 628xxx (tanpa +)</p></div>
+              <div class="fg"><label class="fl">Email</label><input class="fc" id="p-email" type="email"/></div>
+              <div class="fg"><label class="fl">Instagram</label><input class="fc" id="p-instagram" placeholder="ansormanyar"/><p class="fh">Tanpa @</p></div>
+              <div class="fg"><label class="fl">Facebook</label><input class="fc" id="p-facebook" placeholder="https://facebook.com/…"/></div>
+              <div class="fg"><label class="fl">YouTube</label><input class="fc" id="p-youtube"/></div>
+              <div class="fg"><label class="fl">TikTok</label><input class="fc" id="p-tiktok"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tp" id="profil-st">
+        <div class="card">
+          <div class="ch"><span class="ct">Statistik di Beranda Website</span><button class="btn btn-p" onclick="saveProfil()">💾 Simpan ke Sheets</button></div>
+          <div class="cb">
+            <div class="alert al-i">ℹ️ Angka ini tampil di hero beranda: "12 Ranting Aktif", "500+ Anggota", dll.</div>
+            <div class="fg3">
+              <div class="fg"><label class="fl">Jumlah Ranting</label><input class="fc" id="p-stat_ranting" placeholder="12"/></div>
+              <div class="fg"><label class="fl">Jumlah Anggota</label><input class="fc" id="p-stat_anggota" placeholder="500+"/></div>
+              <div class="fg"><label class="fl">Kegiatan/Tahun</label><input class="fc" id="p-stat_kegiatan_per_tahun" placeholder="40+"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEGIATAN -->
+    <div class="sec" id="sec-kegiatan">
+      <div class="card">
+        <div class="ch">
+          <span class="ct">📅 Kegiatan GP Ansor Manyar</span>
+          <button class="btn btn-p" onclick="openM('kegiatan')">+ Tambah Kegiatan</button>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tb-kegiatan"><tr class="loading-row"><td colspan="5"><div class="spin" style="margin:auto"></div></td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="sec" id="sec-banner">
+      <div class="alert al-w">📢 Maks 3 banner dengan Status=<strong>Aktif</strong> ditampilkan di beranda website.</div>
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start">
+        <div class="card">
+          <div class="ch"><span class="ct">Daftar Banner</span><button class="btn btn-g" onclick="openM('banner')">+ Tambah Banner</button></div>
+          <div class="tw"><table>
+            <thead><tr><th>Judul</th><th>Tanggal Acara</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tb-banner"><tr class="loading-row"><td colspan="4"><div class="spin" style="margin:auto"></div></td></tr></tbody>
+          </table></div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--ts);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Preview Aktif</div>
+          <div id="bn-preview"><div class="empty" style="background:var(--w);border-radius:9px;border:1px solid var(--br)"><div class="ei">📢</div><h3>Belum ada banner aktif</h3></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANTING -->
+    <div class="sec" id="sec-ranting">
+      <div class="card">
+        <div class="ch"><span class="ct">🕌 Pimpinan Ranting</span><button class="btn btn-p" onclick="openM('ranting')">+ Tambah Ranting</button></div>
+        <div class="tw"><table>
+          <thead><tr><th>Desa/Kelurahan</th><th>Ketua Ranting</th><th>No. HP</th><th>Anggota</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tb-ranting"><tr class="loading-row"><td colspan="6"><div class="spin" style="margin:auto"></div></td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- PENGURUS -->
+    <div class="sec" id="sec-pengurus">
+      <div class="card">
+        <div class="ch"><span class="ct">👥 Pengurus PAC</span><button class="btn btn-p" onclick="openM('pengurus')">+ Tambah Pengurus</button></div>
+        <div class="tw"><table>
+          <thead><tr><th>Nama</th><th>Jabatan</th><th>Bidang</th><th>No. HP</th><th>Aksi</th></tr></thead>
+          <tbody id="tb-pengurus"><tr class="loading-row"><td colspan="5"><div class="spin" style="margin:auto"></div></td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- GANTI SANDI -->
+    <div class="sec" id="sec-sandi">
+      <div class="card" style="max-width:400px">
+        <div class="ch"><span class="ct">🔒 Ganti Password Admin</span></div>
+        <div class="cb">
+          <div class="fg"><label class="fl">Password Lama</label><input type="password" class="fc" id="pw-lama"/></div>
+          <div class="fg"><label class="fl">Password Baru</label><input type="password" class="fc" id="pw-baru"/></div>
+          <div class="fg"><label class="fl">Konfirmasi Password Baru</label><input type="password" class="fc" id="pw-ulang"/></div>
+          <button class="btn btn-p" onclick="gantiSandi()">Simpan Password</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div id="toasts"></div>
+
+<!-- ═══ MODALS ═══════════════════════════════════════════════ -->
+
+<!-- Modal Kegiatan -->
+<div class="mbg" id="m-kegiatan">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="mt-kegiatan">Tambah Kegiatan</span><button class="mc" onclick="closeM('kegiatan')">×</button></div>
+    <div class="mb">
+      <input type="hidden" id="kg-ID"/>
+      <div class="fg"><label class="fl">Judul Kegiatan *</label><input class="fc" id="kg-Judul Kegiatan" placeholder="Pengajian Rutin GP Ansor…"/></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Tanggal *</label><input type="date" class="fc" id="kg-Tanggal (YYYY-MM-DD)"/></div>
+        <div class="fg"><label class="fl">Kategori *</label>
+          <select class="fc" id="kg-Kategori">
+            <option>Keagamaan</option><option>Sosial</option><option>Pelatihan</option><option>Organisasi</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Lokasi</label><input class="fc" id="kg-Lokasi"/></div>
+        <div class="fg"><label class="fl">Status</label>
+          <select class="fc" id="kg-Status">
+            <option>Selesai</option><option>Akan Datang</option><option>Berlangsung</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Deskripsi Singkat</label><textarea class="fc" id="kg-Deskripsi Singkat" rows="3"></textarea></div>
+      <div class="fg"><label class="fl">URL Foto (opsional)</label><input class="fc" id="kg-URL Foto" placeholder="https://drive.google.com/…"/></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gh" onclick="closeM('kegiatan')">Batal</button>
+      <button class="btn btn-p" onclick="saveRow('kegiatan')">Simpan ke Sheets</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Banner -->
+<div class="mbg" id="m-banner">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="mt-banner">Tambah Banner</span><button class="mc" onclick="closeM('banner')">×</button></div>
+    <div class="mb">
+      <input type="hidden" id="bn-ID"/>
+      <div class="fg"><label class="fl">Judul Banner *</label><input class="fc" id="bn-Judul Banner"/></div>
+      <div class="fg"><label class="fl">Keterangan Singkat</label><input class="fc" id="bn-Keterangan Singkat"/></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Tanggal Acara *</label><input type="date" class="fc" id="bn-Tanggal Acara (YYYY-MM-DD)"/></div>
+        <div class="fg"><label class="fl">Waktu</label><input type="time" class="fc" id="bn-Waktu (HH:MM)"/></div>
+        <div class="fg"><label class="fl">Lokasi</label><input class="fc" id="bn-Lokasi"/></div>
+        <div class="fg"><label class="fl">Status</label>
+          <select class="fc" id="bn-Status"><option>Aktif</option><option>Nonaktif</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gh" onclick="closeM('banner')">Batal</button>
+      <button class="btn btn-g" onclick="saveRow('banner')">Simpan ke Sheets</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ranting -->
+<div class="mbg" id="m-ranting">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="mt-ranting">Tambah Ranting</span><button class="mc" onclick="closeM('ranting')">×</button></div>
+    <div class="mb">
+      <input type="hidden" id="rt-ID"/>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Nama Desa/Kelurahan *</label><input class="fc" id="rt-Nama Desa/Kelurahan"/></div>
+        <div class="fg"><label class="fl">Nama Ranting Resmi</label><input class="fc" id="rt-Nama Ranting Resmi"/></div>
+        <div class="fg"><label class="fl">Ketua Ranting *</label><input class="fc" id="rt-Ketua Ranting"/></div>
+        <div class="fg"><label class="fl">No. HP Ketua</label><input class="fc" id="rt-No. HP Ketua"/></div>
+        <div class="fg"><label class="fl">Sekretaris</label><input class="fc" id="rt-Sekretaris"/></div>
+        <div class="fg"><label class="fl">Bendahara</label><input class="fc" id="rt-Bendahara"/></div>
+        <div class="fg"><label class="fl">Jumlah Anggota</label><input type="number" class="fc" id="rt-Jumlah Anggota" min="0"/></div>
+        <div class="fg"><label class="fl">Tahun Berdiri</label><input type="number" class="fc" id="rt-Tahun Berdiri"/></div>
+        <div class="fg fc-full"><label class="fl">Status</label>
+          <select class="fc" id="rt-Status"><option>Aktif</option><option>Tidak Aktif</option></select>
+        </div>
+        <div class="fg fc-full"><label class="fl">Keterangan</label><textarea class="fc" id="rt-Keterangan" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gh" onclick="closeM('ranting')">Batal</button>
+      <button class="btn btn-p" onclick="saveRow('ranting')">Simpan ke Sheets</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pengurus -->
+<div class="mbg" id="m-pengurus">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="mt-pengurus">Tambah Pengurus</span><button class="mc" onclick="closeM('pengurus')">×</button></div>
+    <div class="mb">
+      <input type="hidden" id="pg-ID"/>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Nama Lengkap *</label><input class="fc" id="pg-Nama Lengkap"/></div>
+        <div class="fg"><label class="fl">Jabatan *</label><input class="fc" id="pg-Jabatan"/></div>
+        <div class="fg fc-full"><label class="fl">Bidang/Departemen</label>
+          <select class="fc" id="pg-Bidang/Departemen">
+            <option>Pengurus Inti</option><option>Kaderisasi</option>
+            <option>Pendidikan & Kebudayaan</option><option>Dakwah & Pengembangan Agama</option>
+            <option>Sosial & Pengabdian Masyarakat</option><option>Ekonomi & Kewirausahaan</option>
+            <option>Informasi & Komunikasi</option><option>Olahraga & Seni</option><option>Banser</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">No. HP</label><input class="fc" id="pg-No. HP"/></div>
+        <div class="fg"><label class="fl">Periode</label><input class="fc" id="pg-Periode" placeholder="2023–2026"/></div>
+        <div class="fg fc-full"><label class="fl">Asal Ranting/Desa</label><input class="fc" id="pg-Asal Ranting/Desa"/></div>
+        <div class="fg fc-full"><label class="fl">URL Foto (opsional)</label><input class="fc" id="pg-URL Foto (opsional)"/></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gh" onclick="closeM('pengurus')">Batal</button>
+      <button class="btn btn-p" onclick="saveRow('pengurus')">Simpan ke Sheets</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ══════════════════════════════════════════════ -->
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7e6E1qn80aSB3QNAUO0atO-CamKkk-nmwmHkg23PoaGvA8uOnwPW3H5K4gyJMlAr3/exec';
+const DEFAULT_PASS = 'ansormanyar2024';
+
+// Kolom ID per sheet
+const ID_COL = {
+  kegiatan: 'ID', banner: 'ID', ranting: 'ID', pengurus: 'ID'
+};
+
+// Prefix form field per sheet
+const PREFIX = {
+  kegiatan:'kg', banner:'bn', ranting:'rt', pengurus:'pg'
+};
+
+// Kolom per sheet (harus cocok dengan COLS di Apps Script)
+const COLS = {
+  kegiatan: ['ID','Judul Kegiatan','Tanggal (YYYY-MM-DD)','Kategori','Lokasi','Status','Deskripsi Singkat','URL Foto'],
+  banner:   ['ID','Judul Banner','Keterangan Singkat','Tanggal Acara (YYYY-MM-DD)','Waktu (HH:MM)','Lokasi','Status'],
+  ranting:  ['ID','Nama Desa/Kelurahan','Nama Ranting Resmi','Ketua Ranting','No. HP Ketua','Sekretaris','Bendahara','Jumlah Anggota','Tahun Berdiri','Status','Keterangan'],
+  pengurus: ['ID','Nama Lengkap','Jabatan','Bidang/Departemen','No. HP','Periode','Asal Ranting/Desa','URL Foto (opsional)'],
+};
+
+// ── STATE ───────────────────────────────────────────────────────
+let DB = { profil:{}, kegiatan:[], banner:[], ranting:[], pengurus:[] };
+let adminPass = sessionStorage.getItem('gpa_pass') || '';
+
+// ── AUTH ────────────────────────────────────────────────────────
+function doLogin() {
+  const p = document.getElementById('lpass').value;
+  if (!p) return;
+  adminPass = p;
+  sessionStorage.setItem('gpa_pass', p);
+  document.getElementById('login').classList.remove('on');
+  init();
+}
+document.getElementById('lpass').onkeydown = e => { if(e.key==='Enter') doLogin(); };
+
+function doLogout() {
+  sessionStorage.clear();
+  location.reload();
+}
+
+function checkLogin() {
+  if (adminPass) {
+    document.getElementById('login').classList.remove('on');
+    init();
+  }
+  // jika tidak ada session, login screen tetap tampil
+}
+
+// ── INIT ────────────────────────────────────────────────────────
+function init() {
+  loadAll();
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+const TITLES = {
+  dashboard:'Dashboard', koneksi:'Koneksi Sheets', profil:'Profil Organisasi',
+  kegiatan:'Kegiatan', banner:'Banner Mendatang', ranting:'Data Ranting',
+  pengurus:'Pengurus PAC', sandi:'Ganti Password'
+};
+
+function go(id) {
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    if(b.textContent.trim().toLowerCase().startsWith(TITLES[id].split(' ')[0].toLowerCase()))
+      b.classList.add('on');
+  });
+  document.getElementById('pg-title').textContent = TITLES[id];
+  document.getElementById('sb').classList.remove('on');
+  if(id==='profil') fillProfil();
+}
+
+function togSB() { document.getElementById('sb').classList.toggle('on'); }
+function stab(sec,tab,el) {
+  document.querySelectorAll('#sec-'+sec+' .tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('#sec-'+sec+' .tp').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById(sec+'-'+tab).classList.add('on');
+}
+
+// ── API CALLS ───────────────────────────────────────────────────
+async function gasGet(params) {
+  const url = GAS_URL + '?' + new URLSearchParams(params);
+  const r = await fetch(url);
+  return r.json();
+}
+
+async function gasPost(body) {
+  const r = await fetch(GAS_URL, {
+    method:'POST',
+    body: JSON.stringify({ ...body, password: adminPass }),
+  });
+  return r.json();
+}
+
+// ── LOAD ALL ─────────────────────────────────────────────────────
+async function loadAll() {
+  setPill('wait','⏳ Memuat…');
+  try {
+    const res = await gasGet({ action:'readAll' });
+    if (res.error) throw new Error(res.error);
+
+    DB.profil   = res.profil?.data   || {};
+    DB.kegiatan = res.kegiatan?.data || [];
+    DB.banner   = res.banner?.data   || [];
+    DB.ranting  = res.ranting?.data  || [];
+    DB.pengurus = res.pengurus?.data || [];
+
+    setPill('ok','✓ Terhubung ke Sheets');
+    setDot('ok','Terhubung ke Google Sheets');
+    renderDash();
+    renderTable('kegiatan');
+    renderTable('banner');
+    renderTable('ranting');
+    renderTable('pengurus');
+    fillProfil();
+  } catch(e) {
+    setPill('err','✗ Gagal konek');
+    setDot('err','Gagal: '+e.message);
+    toast('Gagal memuat data: '+e.message,'err');
+  }
+}
+
+async function testKoneksi() {
+  setDot('ld','Menguji koneksi…');
+  try {
+    const res = await gasGet({ action:'ping' });
+    if (res.ok) {
+      setDot('ok','Koneksi OK — '+res.time);
+      toast('Koneksi berhasil ✓','ok');
+    } else throw new Error(res.error||'Unknown');
+  } catch(e) {
+    setDot('err','Gagal: '+e.message);
+    toast('Koneksi gagal: '+e.message,'err');
+  }
+}
+
+// ── PROFIL ───────────────────────────────────────────────────────
+const P_FIELDS = [
+  'nama_resmi','nama_singkat','periode_kepengurusan','tahun_berdiri',
+  'alamat_sekretariat','tagline','visi','misi_1','misi_2','misi_3',
+  'no_whatsapp','email','instagram','facebook','youtube','tiktok',
+  'stat_ranting','stat_anggota','stat_kegiatan_per_tahun'
+];
+
+function fillProfil() {
+  P_FIELDS.forEach(k => {
+    const el = document.getElementById('p-'+k);
+    if (el) el.value = DB.profil[k] || '';
+  });
+}
+
+async function saveProfil() {
+  const data = {};
+  P_FIELDS.forEach(k => {
+    const el = document.getElementById('p-'+k);
+    if (el) data[k] = el.value;
+  });
+  const btn = document.getElementById('btn-saveprofil');
+  if(btn){ btn.disabled=true; btn.textContent='Menyimpan…'; }
+  try {
+    const res = await gasPost({ action:'saveProfil', data });
+    if (res.error) throw new Error(res.error);
+    DB.profil = data;
+    toast('Profil disimpan ke Sheets ✓','ok');
+  } catch(e) {
+    toast('Gagal: '+e.message,'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='💾 Simpan ke Sheets'; }
+  }
+}
+
+// ── RENDER TABLES ────────────────────────────────────────────────
+const BADGE_KAT = {
+  'Keagamaan':'bx-p','Sosial':'bx-b','Pelatihan':'bx-y','Organisasi':'bx-g',
+  'Selesai':'bx-g','Akan Datang':'bx-y','Berlangsung':'bx-b',
+  'Aktif':'bx-g','Tidak Aktif':'bx-r','Nonaktif':'bx-r'
+};
+
+function bx(val) {
+  return `<span class="bx ${BADGE_KAT[val]||'bx-gr'}">${esc(val)}</span>`;
+}
+
+function renderTable(name) {
+  const tbody = document.getElementById('tb-'+name);
+  if (!tbody) return;
+  const rows = DB[name] || [];
+
+  if (!rows.length) {
+    const msg = {kegiatan:'kegiatan',banner:'banner',ranting:'ranting',pengurus:'pengurus'};
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="ei">📋</div><h3>Belum ada data ${msg[name]}</h3><p>Klik tombol tambah di atas untuk mulai.</p></div></td></tr>`;
+    if(name==='banner') renderBannerPreview();
+    return;
+  }
+
+  let html = '';
+  if (name==='kegiatan') {
+    rows.forEach((r,i) => {
+      html += `<tr>
+        <td><strong>${esc(r['Judul Kegiatan'])}</strong>${r['Lokasi']?'<br><small style="color:var(--tm)">📍'+esc(r['Lokasi'])+'</small>':''}</td>
+        <td>${fmtTgl(r['Tanggal (YYYY-MM-DD)'])}</td>
+        <td>${bx(r['Kategori'])}</td>
+        <td>${bx(r['Status'])}</td>
+        <td><div class="tda">
+          <button class="btn btn-o btn-sm" onclick="editRow('kegiatan',${i})">Edit</button>
+          <button class="btn btn-r btn-sm" onclick="delRow('kegiatan','${esc(r.ID)}')">Hapus</button>
+        </div></td></tr>`;
+    });
+  } else if (name==='banner') {
+    rows.forEach((r,i) => {
+      html += `<tr>
+        <td><strong>${esc(r['Judul Banner'])}</strong>${r['Keterangan Singkat']?'<br><small style="color:var(--tm)">'+esc(r['Keterangan Singkat'])+'</small>':''}</td>
+        <td>${fmtTgl(r['Tanggal Acara (YYYY-MM-DD)'])}</td>
+        <td>${bx(r['Status'])}</td>
+        <td><div class="tda">
+          <button class="btn btn-o btn-sm" onclick="editRow('banner',${i})">Edit</button>
+          <button class="btn btn-r btn-sm" onclick="delRow('banner','${esc(r.ID)}')">Hapus</button>
+        </div></td></tr>`;
+    });
+    renderBannerPreview();
+  } else if (name==='ranting') {
+    rows.forEach((r,i) => {
+      const hp = r['No. HP Ketua'];
+      html += `<tr>
+        <td><strong>${esc(r['Nama Desa/Kelurahan'])}</strong>${r['Nama Ranting Resmi']?'<br><small style="color:var(--tm)">'+esc(r['Nama Ranting Resmi'])+'</small>':''}</td>
+        <td>${esc(r['Ketua Ranting'])}</td>
+        <td>${hp?`<a href="https://wa.me/${hp.replace(/\D/g,'')}" target="_blank" style="color:var(--h)">${esc(hp)}</a>`:'—'}</td>
+        <td>${r['Jumlah Anggota']||'—'}</td>
+        <td>${bx(r['Status'])}</td>
+        <td><div class="tda">
+          <button class="btn btn-o btn-sm" onclick="editRow('ranting',${i})">Edit</button>
+          <button class="btn btn-r btn-sm" onclick="delRow('ranting','${esc(r.ID)}')">Hapus</button>
+        </div></td></tr>`;
+    });
+  } else if (name==='pengurus') {
+    rows.forEach((r,i) => {
+      html += `<tr>
+        <td><strong>${esc(r['Nama Lengkap'])}</strong>${r['Asal Ranting/Desa']?'<br><small style="color:var(--tm)">'+esc(r['Asal Ranting/Desa'])+'</small>':''}</td>
+        <td>${esc(r['Jabatan'])}</td>
+        <td>${bx(r['Bidang/Departemen'])}</td>
+        <td>${r['No. HP']?`<a href="https://wa.me/${r['No. HP'].replace(/\D/g,'')}" target="_blank" style="color:var(--h)">${esc(r['No. HP'])}</a>`:'—'}</td>
+        <td><div class="tda">
+          <button class="btn btn-o btn-sm" onclick="editRow('pengurus',${i})">Edit</button>
+          <button class="btn btn-r btn-sm" onclick="delRow('pengurus','${esc(r.ID)}')">Hapus</button>
+        </div></td></tr>`;
+    });
+  }
+  tbody.innerHTML = html;
+}
+
+function renderBannerPreview() {
+  const aktif = (DB.banner||[]).filter(b=>b['Status']==='Aktif').slice(0,3);
+  const el = document.getElementById('bn-preview');
+  if (!aktif.length) {
+    el.innerHTML = '<div class="empty" style="background:var(--w);border-radius:9px;border:1px solid var(--br)"><div class="ei">📢</div><h3>Belum ada banner aktif</h3></div>';
+    return;
+  }
+  el.innerHTML = aktif.map(b=>`
+    <div class="bp">
+      <div class="bp-lbl">📢 Akan Datang</div>
+      <div class="bp-t">${esc(b['Judul Banner'])}</div>
+      ${b['Keterangan Singkat']?`<div class="bp-s">${esc(b['Keterangan Singkat'])}</div>`:''}
+      <div class="bp-m">${fmtTgl(b['Tanggal Acara (YYYY-MM-DD)'])}${b['Waktu (HH:MM)']?' · '+b['Waktu (HH:MM)']:''}${b['Lokasi']?' · '+esc(b['Lokasi']):''}</div>
+    </div>`).join('');
+}
+
+function renderDash() {
+  document.getElementById('st-r').textContent = (DB.ranting||[]).filter(r=>r['Status']==='Aktif').length;
+  document.getElementById('st-p').textContent = (DB.pengurus||[]).length;
+  document.getElementById('st-k').textContent = (DB.kegiatan||[]).length;
+  document.getElementById('st-b').textContent = (DB.banner||[]).filter(b=>b['Status']==='Aktif').length;
+
+  const kg = (DB.kegiatan||[]).slice(0,3);
+  document.getElementById('dash-kg').innerHTML = kg.length
+    ? kg.map(k=>`<div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--br)">
+        <span style="font-size:18px">${k['Kategori']==='Keagamaan'?'🕌':k['Kategori']==='Sosial'?'🤝':k['Kategori']==='Pelatihan'?'📚':'📋'}</span>
+        <div><div style="font-size:12px;font-weight:600">${esc(k['Judul Kegiatan'])}</div>
+        <div style="font-size:10px;color:var(--tm)">${fmtTgl(k['Tanggal (YYYY-MM-DD)'])}</div></div></div>`).join('')
+    : '<div class="empty"><div class="ei">📅</div><h3>Belum ada kegiatan</h3></div>';
+
+  const bn = (DB.banner||[]).filter(b=>b['Status']==='Aktif').slice(0,3);
+  document.getElementById('dash-bn').innerHTML = bn.length
+    ? bn.map(b=>`<div style="padding:7px 0;border-bottom:1px solid var(--br)">
+        <div style="font-size:12px;font-weight:600">${esc(b['Judul Banner'])}</div>
+        <div style="font-size:10px;color:var(--tm)">${fmtTgl(b['Tanggal Acara (YYYY-MM-DD)'])}</div></div>`).join('')
+    : '<div class="empty"><div class="ei">📢</div><h3>Belum ada banner aktif</h3></div>';
+}
+
+// ── MODAL CRUD ────────────────────────────────────────────────────
+function openM(name, idx) {
+  const m = document.getElementById('m-'+name);
+  const px = PREFIX[name];
+  const cols = COLS[name];
+  // Reset form
+  cols.forEach(col => {
+    const el = document.getElementById(px+'-'+col);
+    if(el){ if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }
+  });
+  document.getElementById(px+'-ID').value = '';
+  document.getElementById('mt-'+name).textContent = 'Tambah '+name.charAt(0).toUpperCase()+name.slice(1);
+  m.classList.add('on');
+}
+
+function editRow(name, idx) {
+  const row  = DB[name][idx];
+  const px   = PREFIX[name];
+  const cols = COLS[name];
+  cols.forEach(col => {
+    const el = document.getElementById(px+'-'+col);
+    if(el) el.value = row[col] || '';
+  });
+  document.getElementById('mt-'+name).textContent = 'Edit '+name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById('m-'+name).classList.add('on');
+}
+
+function closeM(name) { document.getElementById('m-'+name).classList.remove('on'); }
+
+async function saveRow(name) {
+  const px   = PREFIX[name];
+  const cols = COLS[name];
+
+  // Kumpulkan data dari form
+  const data = {};
+  cols.forEach(col => {
+    const el = document.getElementById(px+'-'+col);
+    data[col] = el ? el.value : '';
+  });
+
+  // Generate ID baru jika kosong
+  if (!data['ID']) {
+    const prefix = {kegiatan:'KG',banner:'BN',ranting:'RT',pengurus:'PG'}[name];
+    data['ID'] = prefix + Date.now().toString(36).toUpperCase();
+  }
+
+  // Validasi wajib
+  const required = {kegiatan:['Judul Kegiatan','Tanggal (YYYY-MM-DD)'],banner:['Judul Banner','Tanggal Acara (YYYY-MM-DD)'],ranting:['Nama Desa/Kelurahan','Ketua Ranting'],pengurus:['Nama Lengkap','Jabatan']};
+  for(const col of (required[name]||[])){
+    if(!data[col]){ toast(col+' wajib diisi.','err'); return; }
+  }
+
+  // Kirim ke Apps Script
+  const btns = document.querySelectorAll('#m-'+name+' .btn-p, #m-'+name+' .btn-g');
+  btns.forEach(b=>{b.disabled=true; b.textContent='Menyimpan…';});
+  try {
+    const res = await gasPost({ action:'upsert', sheet:name, data });
+    if(res.error) throw new Error(res.error);
+
+    // Update state lokal
+    const idx = DB[name].findIndex(r=>r['ID']===data['ID']);
+    if(idx>=0) DB[name][idx]=data; else DB[name].push(data);
+
+    closeM(name);
+    renderTable(name);
+    renderDash();
+    toast('Data disimpan ke Sheets ✓','ok');
+  } catch(e) {
+    toast('Gagal simpan: '+e.message,'err');
+  } finally {
+    btns.forEach(b=>{b.disabled=false; b.textContent='Simpan ke Sheets';});
+  }
+}
+
+async function delRow(name, id) {
+  if(!confirm('Hapus data ini dari Google Sheets?')) return;
+  try {
+    const res = await gasPost({ action:'delete', sheet:name, id });
+    if(res.error) throw new Error(res.error);
+    DB[name] = DB[name].filter(r=>r['ID']!==id);
+    renderTable(name);
+    renderDash();
+    toast('Data dihapus dari Sheets ✓','ok');
+  } catch(e) {
+    toast('Gagal hapus: '+e.message,'err');
+  }
+}
+
+// ── GANTI SANDI ──────────────────────────────────────────────────
+async function gantiSandi() {
+  const lama   = document.getElementById('pw-lama').value;
+  const baru   = document.getElementById('pw-baru').value;
+  const ulang  = document.getElementById('pw-ulang').value;
+  if(lama !== adminPass){ toast('Password lama salah.','err'); return; }
+  if(!baru || baru.length<6){ toast('Password baru minimal 6 karakter.','err'); return; }
+  if(baru !== ulang){ toast('Konfirmasi password tidak cocok.','err'); return; }
+  try {
+    const res = await gasPost({ action:'setPassword', newPassword:baru });
+    if(res.error) throw new Error(res.error);
+    adminPass = baru;
+    sessionStorage.setItem('gpa_pass', baru);
+    document.getElementById('pw-lama').value='';
+    document.getElementById('pw-baru').value='';
+    document.getElementById('pw-ulang').value='';
+    toast('Password berhasil diperbarui ✓','ok');
+  } catch(e) {
+    toast('Gagal: '+e.message,'err');
+  }
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtTgl(s){ if(!s) return '—'; try{ return new Date(s).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}); }catch{ return s; } }
+function setPill(type,txt){ const p=document.getElementById('cpill'); p.className='conn-pill '+(type==='ok'?'pill-ok':type==='err'?'pill-err':'pill-wait'); p.textContent=txt; }
+function setDot(type,txt){ document.getElementById('cdot').className='cdot '+type; document.getElementById('ctext').textContent=txt; }
+
+function toast(msg,type=''){
+  const wrap=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className='toast '+(type||'');
+  el.textContent=(type==='ok'?'✓ ':type==='err'?'✗ ':'• ')+msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+// Close modal on background click
+document.querySelectorAll('.mbg').forEach(bg=>bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('on'); }));
+
+// ── START ─────────────────────────────────────────────────────────
+checkLogin();
+</script>
+</body>
+</html>
