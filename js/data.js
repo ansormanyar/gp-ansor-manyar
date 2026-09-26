@@ -170,7 +170,9 @@ const AnsorData = {
   // Banner/kegiatan mendatang — ambil yang status Aktif
   async getBannerAktif() {
     const db      = await this._db();
-    const banners = db?.banner || LOCAL_DATA.banner;
+    const banners = (db?.banner && db.banner.length > 0)
+      ? db.banner
+      : LOCAL_DATA.banner;
     const aktif   = banners.filter(b => {
       const s = String(b.status || b.Status || '').toLowerCase();
       return s === 'aktif' || s === 'active' || s === '1' || s === 'true';
@@ -199,7 +201,9 @@ const AnsorData = {
 
   async getKegiatan({ highlight = false, limit = 0 } = {}) {
     const db   = await this._db();
-    let rows   = db?.kegiatan || LOCAL_DATA.kegiatan;
+    let rows   = (db?.kegiatan && db.kegiatan.length > 0)
+      ? db.kegiatan
+      : LOCAL_DATA.kegiatan;
 
     // Urutkan terbaru dulu
     rows = [...rows].sort((a, b) =>
@@ -225,7 +229,10 @@ const AnsorData = {
 
   async getRanting() {
     const db   = await this._db();
-    const rows = db?.ranting || LOCAL_DATA.ranting;
+    // Kalau Sheets kosong atau gagal → pakai data lokal
+    const rows = (db?.ranting && db.ranting.length > 0)
+      ? db.ranting
+      : LOCAL_DATA.ranting;
 
     return rows
       .filter(r => {
@@ -265,7 +272,9 @@ const AnsorData = {
 
   async getPengurusPAC({ limit = 0 } = {}) {
     const db   = await this._db();
-    const rows = db?.pengurus || LOCAL_DATA.pengurus;
+    const rows = (db?.pengurus && db.pengurus.length > 0)
+      ? db.pengurus
+      : LOCAL_DATA.pengurus;
 
     // Urutkan: Pengurus Inti dulu
     const sorted = [...rows].sort((a, b) => {
