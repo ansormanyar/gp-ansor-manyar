@@ -54,10 +54,11 @@ const DB = {
   },
 
 async login(username, password) {
-  const res  = await fetch(CONFIG.GAS_URL, {
-    method : 'POST',
-    body   : JSON.stringify({ action: 'login', username, password }),
-  });
+  const url  = CONFIG.GAS_URL
+    + '?action=login'
+    + '&username=' + encodeURIComponent(username)
+    + '&password=' + encodeURIComponent(password);
+  const res  = await fetch(url);
   const json = await res.json();
   if (!json.ok) throw new Error(json.error);
   return json.data;
