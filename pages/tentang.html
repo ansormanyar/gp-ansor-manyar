@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tentang — GP Ansor Manyar</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-brand">
+      <img src="../assets/logo.png" alt="Logo GP Ansor" onerror="this.style.display='none'"/>
+      <div class="nav-brand-text">
+        <strong>GP Ansor Manyar</strong>
+        <span>PAC Kec. Manyar · Kab. Gresik</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Beranda</a></li>
+      <li><a href="kegiatan.html">Kegiatan</a></li>
+      <li><a href="ranting.html">Ranting</a></li>
+      <li><a href="pengurus.html">Pengurus</a></li>
+      <li><a href="tentang.html" class="active">Tentang</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="breadcrumb"><div class="container"><a href="../index.html">Beranda</a><span>›</span> Tentang</div></div>
+
+<div class="page-header">
+  <h1>Tentang GP Ansor Manyar</h1>
+  <p>Mengenal Gerakan Pemuda Ansor Kecamatan Manyar</p>
+</div>
+
+<section class="section">
+  <div class="container">
+    <!-- Profil -->
+    <div style="max-width:700px;margin:0 auto 3rem">
+      <h2 style="color:var(--hijau);margin-bottom:1rem">Profil Organisasi</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:.95rem">
+        <tr><td style="padding:.5rem;color:var(--abu-3);width:40%">Nama Resmi</td><td id="namaResmi" style="padding:.5rem;font-weight:500">-</td></tr>
+        <tr style="background:var(--abu-1)"><td style="padding:.5rem;color:var(--abu-3)">Periode</td><td id="periode" style="padding:.5rem;font-weight:500">-</td></tr>
+        <tr><td style="padding:.5rem;color:var(--abu-3)">Tahun Berdiri</td><td id="tahunBerdiri" style="padding:.5rem;font-weight:500">-</td></tr>
+        <tr style="background:var(--abu-1)"><td style="padding:.5rem;color:var(--abu-3)">Alamat</td><td id="alamat" style="padding:.5rem;font-weight:500">-</td></tr>
+      </table>
+    </div>
+
+    <!-- Visi Misi -->
+    <div style="max-width:700px;margin:0 auto 3rem">
+      <h2 style="color:var(--hijau);margin-bottom:1.5rem">Visi & Misi</h2>
+      <div class="visi-box">
+        <h3>Visi</h3>
+        <p id="visi">Memuat...</p>
+      </div>
+      <h3 style="margin-bottom:1rem;color:var(--hijau)">Misi</h3>
+      <div class="misi-list" id="misiList">
+        <div class="loading">Memuat misi...</div>
+      </div>
+    </div>
+
+    <!-- Kontak -->
+    <div style="max-width:700px;margin:0 auto">
+      <h2 style="color:var(--hijau);margin-bottom:1.5rem">Hubungi Kami</h2>
+      <div class="kontak-grid" id="kontakGrid">
+        <div class="loading">Memuat kontak...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; <span id="tahun"></span> <strong>GP Ansor Manyar</strong></p>
+</footer>
+
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+  document.getElementById('tahun').textContent = new Date().getFullYear();
+
+  async function init() {
+    try {
+      const data = await DB.getAll();
+      const p    = data.profil || {};
+
+      // Profil
+      if (p.nama_resmi)   document.getElementById('namaResmi').textContent   = p.nama_resmi;
+      if (p.periode)      document.getElementById('periode').textContent      = p.periode;
+      if (p.tahun_berdiri)document.getElementById('tahunBerdiri').textContent = p.tahun_berdiri;
+      if (p.alamat)       document.getElementById('alamat').textContent       = p.alamat;
+
+      // Visi
+      if (p.visi) document.getElementById('visi').textContent = p.visi;
+
+      // Misi
+      const misiList = document.getElementById('misiList');
+      const misi = [p.misi_1, p.misi_2, p.misi_3].filter(Boolean);
+      if (misi.length) {
+        misiList.innerHTML = misi.map((m,i) => `
+          <div class="misi-item">
+            <div class="misi-num">${i+1}</div>
+            <div>${m}</div>
+          </div>`).join('');
+      } else {
+        misiList.innerHTML = '<p class="kosong">Belum ada data misi.</p>';
+      }
+
+      // Kontak
+      const kontak = [];
+      if (p.no_whatsapp) kontak.push({ ikon:'💬', label:'WhatsApp', val: p.no_whatsapp, href:'https://wa.me/62'+p.no_whatsapp.replace(/^0/,'') });
+      if (p.email)       kontak.push({ ikon:'📧', label:'Email',    val: p.email,       href:'mailto:'+p.email });
+      if (p.instagram)   kontak.push({ ikon:'📸', label:'Instagram',val: '@'+p.instagram, href:'https://instagram.com/'+p.instagram });
+      if (p.facebook)    kontak.push({ ikon:'📘', label:'Facebook', val: p.facebook,    href:'https://facebook.com/'+p.facebook });
+      if (p.youtube)     kontak.push({ ikon:'▶️', label:'YouTube',  val: p.youtube,     href:'https://youtube.com/@'+p.youtube });
+
+      const kontakGrid = document.getElementById('kontakGrid');
+      if (kontak.length) {
+        kontakGrid.innerHTML = kontak.map(k => `
+          <a href="${k.href}" target="_blank" rel="noopener" class="kontak-item" style="text-decoration:none">
+            <div class="kontak-ikon">${k.ikon}</div>
+            <div>
+              <div class="kontak-label">${k.label}</div>
+              <div class="kontak-val">${k.val}</div>
+            </div>
+          </a>`).join('');
+      } else {
+        kontakGrid.innerHTML = '<p class="kosong">Belum ada info kontak.</p>';
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  }
+  init();
+</script>
+</body>
+</html>

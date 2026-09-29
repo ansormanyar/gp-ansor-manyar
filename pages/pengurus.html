@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pengurus PAC — GP Ansor Manyar</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-brand">
+      <img src="../assets/logo.png" alt="Logo GP Ansor" onerror="this.style.display='none'"/>
+      <div class="nav-brand-text">
+        <strong>GP Ansor Manyar</strong>
+        <span>PAC Kec. Manyar · Kab. Gresik</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Beranda</a></li>
+      <li><a href="kegiatan.html">Kegiatan</a></li>
+      <li><a href="ranting.html">Ranting</a></li>
+      <li><a href="pengurus.html" class="active">Pengurus</a></li>
+      <li><a href="tentang.html">Tentang</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="breadcrumb"><div class="container"><a href="../index.html">Beranda</a><span>›</span> Pengurus PAC</div></div>
+
+<div class="page-header">
+  <h1>Pengurus PAC GP Ansor Manyar</h1>
+  <p>Struktur kepengurusan Pimpinan Anak Cabang GP Ansor Kecamatan Manyar</p>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div id="pengurusByBidang"></div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; <span id="tahun"></span> <strong>GP Ansor Manyar</strong></p>
+</footer>
+
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+  document.getElementById('tahun').textContent = new Date().getFullYear();
+
+  async function init() {
+    const el = document.getElementById('pengurusByBidang');
+    try {
+      const data = await DB.getAll();
+      const list = data.pengurus || [];
+      if (!list.length) { el.innerHTML = '<p class="kosong">Belum ada data pengurus.</p>'; return; }
+
+      // Kelompokkan per bidang
+      const bidangMap = {};
+      list.forEach(p => {
+        const b = p['Bidang'] || 'Umum';
+        if (!bidangMap[b]) bidangMap[b] = [];
+        bidangMap[b].push(p);
+      });
+
+      el.innerHTML = Object.entries(bidangMap).map(([bidang, anggota]) => `
+        <div style="margin-bottom:2.5rem">
+          <h3 style="color:var(--hijau);margin-bottom:1rem;font-size:1.1rem;border-bottom:2px solid var(--hijau-muda);padding-bottom:.5rem">${bidang}</h3>
+          <div class="pengurus-grid">
+            ${anggota.map(p => `
+              <div class="pengurus-card">
+                ${p['Foto']
+                  ? `<img class="pengurus-foto" src="${p['Foto']}" alt="${p['Nama']}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 1rem"/>`
+                  : `<div class="pengurus-foto">👤</div>`}
+                <div class="pengurus-nama">${p['Nama']}</div>
+                <div class="pengurus-jabatan">${p['Jabatan']}</div>
+                ${p['Asal Desa'] ? `<div class="pengurus-bidang">📍 ${p['Asal Desa']}</div>` : ''}
+                ${p['HP'] ? `<div class="pengurus-bidang" style="margin-top:.3rem">📱 ${p['HP']}</div>` : ''}
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      el.innerHTML = '<p class="kosong">Gagal memuat data.</p>';
+    }
+  }
+  init();
+</script>
+</body>
+</html>

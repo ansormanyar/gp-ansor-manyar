@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Admin — GP Ansor Manyar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --hijau:#1a7a3c; --hijau-tua:#145f2f; --merah:#dc3545; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:'Inter',system-ui,sans-serif;
+      background:linear-gradient(135deg, var(--hijau-tua), var(--hijau));
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:1rem;
+    }
+    .card {
+      background:#fff; border-radius:16px;
+      padding:2.5rem 2rem; width:100%; max-width:400px;
+      box-shadow:0 20px 60px rgba(0,0,0,.2);
+    }
+    .logo { text-align:center; margin-bottom:2rem; }
+    .logo h1 { font-size:1.4rem; color:var(--hijau); margin-top:.5rem; }
+    .logo p  { font-size:.85rem; color:#6c757d; }
+    .form-group { margin-bottom:1.25rem; }
+    label { display:block; font-size:.85rem; font-weight:500; margin-bottom:.4rem; color:#495057; }
+    input {
+      width:100%; padding:.75rem 1rem; border:2px solid #e9ecef;
+      border-radius:8px; font-size:.95rem; font-family:inherit;
+      transition:border-color .2s;
+    }
+    input:focus { outline:none; border-color:var(--hijau); }
+    .btn {
+      width:100%; padding:.85rem; background:var(--hijau); color:#fff;
+      border:none; border-radius:8px; font-size:1rem; font-weight:600;
+      cursor:pointer; font-family:inherit; transition:background .2s;
+    }
+    .btn:hover { background:var(--hijau-tua); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .error {
+      background:#fff5f5; color:var(--merah); border:1px solid #f5c6cb;
+      border-radius:8px; padding:.75rem 1rem; font-size:.85rem;
+      margin-bottom:1rem; display:none;
+    }
+    .back { text-align:center; margin-top:1.5rem; font-size:.85rem; color:#6c757d; }
+    .back a { color:var(--hijau); font-weight:500; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div style="font-size:3rem">🌙</div>
+    <h1>GP Ansor Manyar</h1>
+    <p>Panel Admin</p>
+  </div>
+
+  <div class="error" id="errMsg"></div>
+
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Masukkan username" autocomplete="username"/>
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password"/>
+  </div>
+
+  <button class="btn" id="btnLogin">Masuk</button>
+
+  <div class="back"><a href="../index.html">← Kembali ke Website</a></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script>
+  // Redirect jika sudah login
+  if (sessionStorage.getItem('ansor_token')) {
+    location.href = 'dashboard.html';
+  }
+
+  async function doLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errMsg   = document.getElementById('errMsg');
+    const btn      = document.getElementById('btnLogin');
+
+    if (!username || !password) {
+      errMsg.style.display = 'block';
+      errMsg.textContent   = 'Username dan password wajib diisi.';
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Memproses...';
+    errMsg.style.display = 'none';
+
+    try {
+      const result = await DB.login(username, password);
+      sessionStorage.setItem('ansor_token', result.token);
+      sessionStorage.setItem('ansor_nama',  result.nama);
+      sessionStorage.setItem('ansor_role',  result.role);
+      location.href = 'dashboard.html';
+    } catch(e) {
+      errMsg.style.display = 'block';
+      errMsg.textContent   = e.message || 'Login gagal. Periksa username dan password.';
+      btn.disabled    = false;
+      btn.textContent = 'Masuk';
+    }
+  }
+
+  document.getElementById('btnLogin').addEventListener('click', doLogin);
+  document.getElementById('password').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>

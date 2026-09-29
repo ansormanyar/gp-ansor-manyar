@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Admin — GP Ansor Manyar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --hijau:#1a7a3c; --hijau-tua:#145f2f; --hijau-muda:#e8f5ee;
+      --abu-1:#f8f9fa; --abu-2:#e9ecef; --abu-3:#6c757d;
+      --merah:#dc3545; --kuning:#f5a623; --biru:#0d6efd;
+      --shadow:0 2px 12px rgba(0,0,0,.08); --radius:10px;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--abu-1); color:#212529; }
+    
+    /* Layout */
+    .layout { display:flex; min-height:100vh; }
+    .sidebar {
+      width:240px; background:var(--hijau-tua); color:#fff;
+      display:flex; flex-direction:column; flex-shrink:0;
+      position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:50;
+    }
+    .sidebar-brand {
+      padding:1.5rem 1.25rem; border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .sidebar-brand strong { display:block; font-size:1rem; }
+    .sidebar-brand span   { font-size:.75rem; opacity:.7; }
+    .sidebar-user {
+      padding:1rem 1.25rem; border-bottom:1px solid rgba(255,255,255,.1);
+      font-size:.82rem; opacity:.8;
+    }
+    .sidebar-menu { padding:.75rem 0; flex:1; }
+    .menu-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.7rem 1.25rem; cursor:pointer; font-size:.9rem;
+      transition:background .15s; border:none; background:none;
+      color:#fff; width:100%; text-align:left;
+    }
+    .menu-item:hover      { background:rgba(255,255,255,.1); }
+    .menu-item.active     { background:rgba(255,255,255,.2); font-weight:600; }
+    .sidebar-footer {
+      padding:1rem 1.25rem; border-top:1px solid rgba(255,255,255,.1);
+    }
+    .btn-logout {
+      width:100%; padding:.6rem; border:1px solid rgba(255,255,255,.3);
+      border-radius:8px; color:#fff; background:none; cursor:pointer;
+      font-size:.85rem; font-family:inherit; transition:background .2s;
+    }
+    .btn-logout:hover { background:rgba(255,255,255,.1); }
+
+    .main { margin-left:240px; flex:1; padding:2rem; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .page-title {
+      font-size:1.4rem; font-weight:700; color:var(--hijau);
+      margin-bottom:1.5rem; padding-bottom:.75rem;
+      border-bottom:2px solid var(--hijau-muda);
+    }
+
+    /* Tombol */
+    .btn {
+      padding:.55rem 1.25rem; border:none; border-radius:8px;
+      cursor:pointer; font-size:.85rem; font-weight:500;
+      font-family:inherit; transition:all .2s; display:inline-flex;
+      align-items:center; gap:.4rem;
+    }
+    .btn-hijau  { background:var(--hijau); color:#fff; }
+    .btn-hijau:hover { background:var(--hijau-tua); }
+    .btn-merah  { background:var(--merah); color:#fff; }
+    .btn-abu    { background:var(--abu-2); color:#495057; }
+    .btn-abu:hover { background:#dee2e6; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* Tabel */
+    .tbl-wrap { overflow-x:auto; background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); }
+    table { width:100%; border-collapse:collapse; font-size:.875rem; }
+    th { background:var(--hijau); color:#fff; padding:.75rem 1rem; text-align:left; white-space:nowrap; }
+    td { padding:.7rem 1rem; border-bottom:1px solid var(--abu-2); vertical-align:middle; }
+    tr:last-child td { border:none; }
+    tr:hover td { background:var(--hijau-muda); }
+    .badge {
+      display:inline-block; padding:.2rem .6rem; border-radius:50px;
+      font-size:.75rem; font-weight:600;
+    }
+    .badge-hijau { background:var(--hijau-muda); color:var(--hijau); }
+    .badge-abu   { background:var(--abu-2); color:var(--abu-3); }
+    .badge-kuning{ background:#fff3cd; color:#856404; }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-grid.col-1 { grid-template-columns:1fr; }
+    .form-group { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group.full { grid-column:1/-1; }
+    label { font-size:.82rem; font-weight:500; color:#495057; }
+    input, select, textarea {
+      padding:.65rem .9rem; border:2px solid var(--abu-2);
+      border-radius:8px; font-size:.9rem; font-family:inherit;
+      transition:border-color .2s; width:100%;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline:none; border-color:var(--hijau);
+    }
+    textarea { resize:vertical; min-height:90px; }
+
+    /* Modal */
+    .overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.5);
+      display:flex; align-items:center; justify-content:center;
+      z-index:200; padding:1rem;
+    }
+    .modal {
+      background:#fff; border-radius:var(--radius);
+      padding:2rem; width:100%; max-width:600px;
+      max-height:90vh; overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+    }
+    .modal-title { font-size:1.1rem; font-weight:700; color:var(--hijau); margin-bottom:1.5rem; }
+    .modal-footer { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.5rem; }
+
+    /* Toast */
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem;
+      padding:.75rem 1.25rem; border-radius:var(--radius);
+      color:#fff; font-size:.9rem; z-index:999;
+      transform:translateY(100px); opacity:0; transition:all .3s;
+    }
+    #toast.show { transform:translateY(0); opacity:1; }
+    #toast.sukses { background:var(--hijau); }
+    #toast.error  { background:var(--merah); }
+
+    /* Toolbar */
+    .toolbar { display:flex; gap:.75rem; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; }
+    .toolbar input { max-width:250px; }
+
+    /* Profil form */
+    .profil-section {
+      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:1.5rem; margin-bottom:1.5rem;
+    }
+    .profil-section h3 { color:var(--hijau); margin-bottom:1rem; font-size:1rem; }
+
+    /* Dashboard stats */
+    .dash-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .dash-card {
+      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:1.25rem; text-align:center;
+    }
+    .dash-card .angka { font-size:2rem; font-weight:700; color:var(--hijau); }
+    .dash-card .label { font-size:.82rem; color:var(--abu-3); margin-top:.25rem; }
+
+    @media(max-width:768px) {
+      .sidebar { transform:translateX(-100%); transition:transform .3s; }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; padding:1rem; }
+      .form-grid { grid-template-columns:1fr; }
+      .btn-menu { display:block; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <strong>🌙 GP Ansor Manyar</strong>
+      <span>Panel Admin</span>
+    </div>
+    <div class="sidebar-user" id="sidebarUser">Memuat...</div>
+    <nav class="sidebar-menu">
+      <button class="menu-item active" data-page="dashboard">📊 Dashboard</button>
+      <button class="menu-item" data-page="kegiatan">📅 Kegiatan</button>
+      <button class="menu-item" data-page="banner">📢 Agenda/Banner</button>
+      <button class="menu-item" data-page="ranting">🕌 Ranting</button>
+      <button class="menu-item" data-page="pengurus">👥 Pengurus PAC</button>
+      <button class="menu-item" data-page="profil">⚙️ Profil Organisasi</button>
+      <button class="menu-item" data-page="akun">🔑 Ganti Password</button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="btnLogout">🚪 Keluar</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="dash-grid" id="dashStats">
+        <div class="dash-card"><div class="angka" id="ds-kegiatan">-</div><div class="label">Kegiatan</div></div>
+        <div class="dash-card"><div class="angka" id="ds-banner">-</div><div class="label">Agenda</div></div>
+        <div class="dash-card"><div class="angka" id="ds-ranting">-</div><div class="label">Ranting</div></div>
+        <div class="dash-card"><div class="angka" id="ds-pengurus">-</div><div class="label">Pengurus</div></div>
+      </div>
+      <div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem">
+        <h3 style="color:var(--hijau);margin-bottom:.5rem">Selamat datang di Panel Admin</h3>
+        <p style="color:var(--abu-3);font-size:.9rem">Gunakan menu di kiri untuk mengelola konten website GP Ansor Manyar.</p>
+        <p style="color:var(--abu-3);font-size:.9rem;margin-top:.5rem">Perubahan yang disimpan akan langsung tampil di website publik.</p>
+      </div>
+    </div>
+
+    <!-- KEGIATAN -->
+    <div class="page" id="page-kegiatan">
+      <div class="page-title">Manajemen Kegiatan</div>
+      <div class="toolbar">
+        <button class="btn btn-hijau" id="btnTambahKegiatan">＋ Tambah Kegiatan</button>
+        <input type="text" id="cariKegiatan" placeholder="🔍 Cari kegiatan..."/>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Kategori</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyKegiatan"><tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="page" id="page-banner">
+      <div class="page-title">Agenda / Banner Mendatang</div>
+      <div class="toolbar">
+        <button class="btn btn-hijau" id="btnTambahBanner">＋ Tambah Agenda</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Judul</th><th>Tanggal</th><th>Waktu</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyBanner"><tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RANTING -->
+    <div class="page" id="page-ranting">
+      <div class="page-title">Data Ranting</div>
+      <div class="toolbar">
+        <button class="btn btn-hijau" id="btnTambahRanting">＋ Tambah Ranting</button>
+        <input type="text" id="cariRanting" placeholder="🔍 Cari ranting/desa..."/>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Nama Ranting</th><th>Desa</th><th>Ketua</th><th>HP Ketua</th><th>Anggota</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyRanting"><tr><td colspan="7" style="text-align:center;color:var(--abu-3)">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PENGURUS -->
+    <div class="page" id="page-pengurus">
+      <div class="page-title">Pengurus PAC</div>
+      <div class="toolbar">
+        <button class="btn btn-hijau" id="btnTambahPengurus">＋ Tambah Pengurus</button>
+        <input type="text" id="cariPengurus" placeholder="🔍 Cari pengurus..."/>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Nama</th><th>Jabatan</th><th>Bidang</th><th>HP</th><th>Periode</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyPengurus"><tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROFIL -->
+    <div class="page" id="page-profil">
+      <div class="page-title">Profil Organisasi</div>
+      <form id="formProfil">
+        <div class="profil-section">
+          <h3>📋 Identitas</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Nama Resmi</label><input name="nama_resmi" placeholder="Pimpinan Anak Cabang GP Ansor..."/></div>
+            <div class="form-group"><label>Nama Singkat</label><input name="nama_singkat" placeholder="PAC GP Ansor Manyar"/></div>
+            <div class="form-group"><label>Periode Kepengurusan</label><input name="periode" placeholder="2023-2025"/></div>
+            <div class="form-group"><label>Tahun Berdiri</label><input name="tahun_berdiri" placeholder="1996"/></div>
+            <div class="form-group full"><label>Alamat Sekretariat</label><input name="alamat" placeholder="Kecamatan Manyar, Kab. Gresik"/></div>
+            <div class="form-group full"><label>Tagline</label><input name="tagline" placeholder="Bergerak untuk Umat, Berjuang untuk Bangsa"/></div>
+          </div>
+        </div>
+        <div class="profil-section">
+          <h3>🎯 Visi & Misi</h3>
+          <div class="form-grid col-1">
+            <div class="form-group"><label>Visi</label><textarea name="visi" placeholder="Terwujudnya GP Ansor Manyar yang..."></textarea></div>
+            <div class="form-group"><label>Misi 1</label><input name="misi_1" placeholder="Misi pertama organisasi"/></div>
+            <div class="form-group"><label>Misi 2</label><input name="misi_2" placeholder="Misi kedua organisasi"/></div>
+            <div class="form-group"><label>Misi 3</label><input name="misi_3" placeholder="Misi ketiga organisasi"/></div>
+          </div>
+        </div>
+        <div class="profil-section">
+          <h3>📞 Kontak & Media Sosial</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>No. WhatsApp</label><input name="no_whatsapp" placeholder="08123456789"/></div>
+            <div class="form-group"><label>Email</label><input name="email" placeholder="ansor@gmail.com"/></div>
+            <div class="form-group"><label>Instagram</label><input name="instagram" placeholder="ansormanyar (tanpa @)"/></div>
+            <div class="form-group"><label>Facebook</label><input name="facebook" placeholder="ansormanyar"/></div>
+            <div class="form-group"><label>YouTube</label><input name="youtube" placeholder="ansormanyar"/></div>
+            <div class="form-group"><label>TikTok</label><input name="tiktok" placeholder="ansormanyar"/></div>
+          </div>
+        </div>
+        <div class="profil-section">
+          <h3>📊 Statistik (Ditampilkan di Beranda)</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Jumlah Ranting</label><input name="stat_ranting" placeholder="12"/></div>
+            <div class="form-group"><label>Jumlah Anggota</label><input name="stat_anggota" placeholder="500"/></div>
+            <div class="form-group"><label>Kegiatan/Tahun</label><input name="stat_kegiatan" placeholder="40"/></div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-hijau" style="width:100%">💾 Simpan Semua Perubahan</button>
+      </form>
+    </div>
+
+    <!-- AKUN -->
+    <div class="page" id="page-akun">
+      <div class="page-title">Ganti Password</div>
+      <div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:2rem;max-width:400px">
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Password Baru</label>
+          <input type="password" id="passBar" placeholder="Minimal 6 karakter"/>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem">
+          <label>Konfirmasi Password</label>
+          <input type="password" id="passKonfirm" placeholder="Ulangi password baru"/>
+        </div>
+        <button class="btn btn-hijau" id="btnGantiPass" style="width:100%">🔑 Ganti Password</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL KEGIATAN -->
+<div class="overlay" id="modalKegiatan" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modalKegiatanTitle">Tambah Kegiatan</div>
+    <input type="hidden" id="kgID"/>
+    <div class="form-grid">
+      <div class="form-group full"><label>Judul Kegiatan *</label><input id="kgJudul" placeholder="Nama kegiatan"/></div>
+      <div class="form-group"><label>Tanggal *</label><input type="date" id="kgTanggal"/></div>
+      <div class="form-group"><label>Kategori</label>
+        <select id="kgKategori">
+          <option>Keagamaan</option><option>Sosial</option>
+          <option>Pelatihan</option><option>Organisasi</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Lokasi</label><input id="kgLokasi" placeholder="Nama tempat"/></div>
+      <div class="form-group"><label>Status</label>
+        <select id="kgStatus"><option>Aktif</option><option>Selesai</option><option>Batal</option></select>
+      </div>
+      <div class="form-group full"><label>Deskripsi Singkat</label><textarea id="kgDeskripsi" placeholder="Keterangan singkat kegiatan..."></textarea></div>
+      <div class="form-group full"><label>URL Foto (opsional)</label><input id="kgFoto" placeholder="https://..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-abu" onclick="tutupModal('modalKegiatan')">Batal</button>
+      <button class="btn btn-hijau" id="btnSimpanKegiatan">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BANNER -->
+<div class="overlay" id="modalBanner" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modalBannerTitle">Tambah Agenda</div>
+    <input type="hidden" id="bnID"/>
+    <div class="form-grid">
+      <div class="form-group full"><label>Judul *</label><input id="bnJudul" placeholder="Nama agenda/kegiatan mendatang"/></div>
+      <div class="form-group full"><label>Keterangan</label><input id="bnKet" placeholder="Keterangan singkat"/></div>
+      <div class="form-group"><label>Tanggal *</label><input type="date" id="bnTanggal"/></div>
+      <div class="form-group"><label>Waktu</label><input type="time" id="bnWaktu"/></div>
+      <div class="form-group"><label>Lokasi</label><input id="bnLokasi" placeholder="Nama tempat"/></div>
+      <div class="form-group"><label>Status</label>
+        <select id="bnStatus"><option>Aktif</option><option>Nonaktif</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-abu" onclick="tutupModal('modalBanner')">Batal</button>
+      <button class="btn btn-hijau" id="btnSimpanBanner">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RANTING -->
+<div class="overlay" id="modalRanting" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modalRantingTitle">Tambah Ranting</div>
+    <input type="hidden" id="rtID"/>
+    <div class="form-grid">
+      <div class="form-group"><label>Nama Desa/Kelurahan *</label><input id="rtDesa" placeholder="Desa Manyarejo"/></div>
+      <div class="form-group"><label>Nama Ranting Resmi *</label><input id="rtNama" placeholder="PR Ansor Manyarejo"/></div>
+      <div class="form-group"><label>Ketua Ranting</label><input id="rtKetua" placeholder="Nama ketua"/></div>
+      <div class="form-group"><label>No. HP Ketua</label><input id="rtHP" placeholder="08xxx"/></div>
+      <div class="form-group"><label>Sekretaris</label><input id="rtSek" placeholder="Nama sekretaris"/></div>
+      <div class="form-group"><label>Bendahara</label><input id="rtBend" placeholder="Nama bendahara"/></div>
+      <div class="form-group"><label>Jumlah Anggota</label><input type="number" id="rtAnggota" placeholder="50"/></div>
+      <div class="form-group"><label>Tahun Berdiri</label><input type="number" id="rtTahun" placeholder="2010"/></div>
+      <div class="form-group"><label>Status</label>
+        <select id="rtStatus"><option>Aktif</option><option>Nonaktif</option></select>
+      </div>
+      <div class="form-group full"><label>Keterangan</label><input id="rtKet" placeholder="Catatan tambahan"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-abu" onclick="tutupModal('modalRanting')">Batal</button>
+      <button class="btn btn-hijau" id="btnSimpanRanting">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PENGURUS -->
+<div class="overlay" id="modalPengurus" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modalPengurusTitle">Tambah Pengurus</div>
+    <input type="hidden" id="pgID"/>
+    <div class="form-grid">
+      <div class="form-group full"><label>Nama Lengkap *</label><input id="pgNama" placeholder="Nama lengkap pengurus"/></div>
+      <div class="form-group"><label>Jabatan *</label><input id="pgJabatan" placeholder="Ketua, Sekretaris, dst"/></div>
+      <div class="form-group"><label>Bidang/Departemen</label><input id="pgBidang" placeholder="Bidang Organisasi, dll"/></div>
+      <div class="form-group"><label>No. HP</label><input id="pgHP" placeholder="08xxx"/></div>
+      <div class="form-group"><label>Periode</label><input id="pgPeriode" placeholder="2023-2025"/></div>
+      <div class="form-group"><label>Asal Desa</label><input id="pgDesa" placeholder="Desa asal"/></div>
+      <div class="form-group full"><label>URL Foto (opsional)</label><input id="pgFoto" placeholder="https://..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-abu" onclick="tutupModal('modalPengurus')">Batal</button>
+      <button class="btn btn-hijau" id="btnSimpanPengurus">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script>
+// ── AUTH ─────────────────────────────────────────────────────
+const token = sessionStorage.getItem('ansor_token');
+const nama  = sessionStorage.getItem('ansor_nama');
+if (!token) location.href = 'login.html';
+document.getElementById('sidebarUser').textContent = '👤 ' + (nama || 'Admin');
+
+document.getElementById('btnLogout').addEventListener('click', () => {
+  sessionStorage.clear();
+  location.href = 'login.html';
+});
+
+// ── NAVIGASI ──────────────────────────────────────────────────
+let dataSemua = { kegiatan:[], banner:[], ranting:[], pengurus:[], profil:{} };
+
+document.querySelectorAll('.menu-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+  });
+});
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg, tipe = 'sukses') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'show ' + tipe;
+  setTimeout(() => el.className = '', 3000);
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function bukaModal(id)  { document.getElementById(id).style.display = 'flex'; }
+function tutupModal(id) { document.getElementById(id).style.display = 'none'; }
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) tutupModal(el.id); });
+});
+
+// ── BADGE ─────────────────────────────────────────────────────
+function badge(txt) {
+  const kls = txt === 'Aktif' ? 'badge-hijau' : txt === 'Selesai' ? 'badge-kuning' : 'badge-abu';
+  return `<span class="badge ${kls}">${txt}</span>`;
+}
+
+// ── LOAD DATA ─────────────────────────────────────────────────
+async function loadData() {
+  try {
+    dataSemua = await DB.getAll();
+    renderDashboard();
+    renderKegiatan();
+    renderBanner();
+    renderRanting();
+    renderPengurus();
+    isiFormProfil();
+  } catch(e) {
+    toast('Gagal memuat data: ' + e.message, 'error');
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById('ds-kegiatan').textContent = dataSemua.kegiatan.length;
+  document.getElementById('ds-banner').textContent   = dataSemua.banner.length;
+  document.getElementById('ds-ranting').textContent  = dataSemua.ranting.length;
+  document.getElementById('ds-pengurus').textContent = dataSemua.pengurus.length;
+}
+
+// ── KEGIATAN ──────────────────────────────────────────────────
+function renderKegiatan(filter = '') {
+  const tbody = document.getElementById('tbodyKegiatan');
+  let list = dataSemua.kegiatan;
+  if (filter) list = list.filter(k => k['Judul'].toLowerCase().includes(filter.toLowerCase()));
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Belum ada data.</td></tr>'; return; }
+  tbody.innerHTML = list.map(k => `
+    <tr>
+      <td><strong>${k['Judul']}</strong></td>
+      <td>${k['Tanggal']}</td>
+      <td>${k['Kategori']}</td>
+      <td>${k['Lokasi'] || '-'}</td>
+      <td>${badge(k['Status'] || 'Aktif')}</td>
+      <td>
+        <button class="btn btn-abu" style="padding:.3rem .7rem;font-size:.8rem" onclick="editKegiatan('${k['ID']}')">✏️</button>
+        <button class="btn btn-merah" style="padding:.3rem .7rem;font-size:.8rem;margin-left:.3rem" onclick="hapusKegiatan('${k['ID']}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('cariKegiatan').addEventListener('input', e => renderKegiatan(e.target.value));
+document.getElementById('btnTambahKegiatan').addEventListener('click', () => {
+  document.getElementById('modalKegiatanTitle').textContent = 'Tambah Kegiatan';
+  ['kgID','kgJudul','kgLokasi','kgDeskripsi','kgFoto'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('kgKategori').value = 'Keagamaan';
+  document.getElementById('kgStatus').value   = 'Aktif';
+  bukaModal('modalKegiatan');
+});
+
+function editKegiatan(id) {
+  const k = dataSemua.kegiatan.find(x => x['ID'] === id);
+  if (!k) return;
+  document.getElementById('modalKegiatanTitle').textContent = 'Edit Kegiatan';
+  document.getElementById('kgID').value        = k['ID'];
+  document.getElementById('kgJudul').value     = k['Judul'];
+  document.getElementById('kgTanggal').value   = k['Tanggal'];
+  document.getElementById('kgKategori').value  = k['Kategori'];
+  document.getElementById('kgLokasi').value    = k['Lokasi'];
+  document.getElementById('kgStatus').value    = k['Status'];
+  document.getElementById('kgDeskripsi').value = k['Deskripsi'];
+  document.getElementById('kgFoto').value      = k['Foto'];
+  bukaModal('modalKegiatan');
+}
+
+document.getElementById('btnSimpanKegiatan').addEventListener('click', async () => {
+  const judul = document.getElementById('kgJudul').value.trim();
+  const tgl   = document.getElementById('kgTanggal').value;
+  if (!judul || !tgl) { toast('Judul dan tanggal wajib diisi.', 'error'); return; }
+  const btn = document.getElementById('btnSimpanKegiatan');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const id = document.getElementById('kgID').value || buatID('KG');
+    await DB.upsert('kegiatan', {
+      'ID': id, 'Judul': judul, 'Tanggal': tgl,
+      'Kategori': document.getElementById('kgKategori').value,
+      'Lokasi': document.getElementById('kgLokasi').value,
+      'Status': document.getElementById('kgStatus').value,
+      'Deskripsi': document.getElementById('kgDeskripsi').value,
+      'Foto': document.getElementById('kgFoto').value,
+    });
+    tutupModal('modalKegiatan');
+    toast('Kegiatan berhasil disimpan!');
+    await loadData();
+  } catch(e) {
+    toast('Gagal: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Simpan';
+  }
+});
+
+async function hapusKegiatan(id) {
+  if (!confirm('Hapus kegiatan ini?')) return;
+  try {
+    await DB.hapus('kegiatan', id);
+    toast('Kegiatan dihapus.');
+    await loadData();
+  } catch(e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+// ── BANNER ────────────────────────────────────────────────────
+function renderBanner() {
+  const tbody = document.getElementById('tbodyBanner');
+  const list  = dataSemua.banner;
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Belum ada data.</td></tr>'; return; }
+  tbody.innerHTML = list.map(b => `
+    <tr>
+      <td><strong>${b['Judul']}</strong></td>
+      <td>${b['Tanggal']}</td>
+      <td>${b['Waktu'] || '-'}</td>
+      <td>${b['Lokasi'] || '-'}</td>
+      <td>${badge(b['Status'] || 'Aktif')}</td>
+      <td>
+        <button class="btn btn-abu" style="padding:.3rem .7rem;font-size:.8rem" onclick="editBanner('${b['ID']}')">✏️</button>
+        <button class="btn btn-merah" style="padding:.3rem .7rem;font-size:.8rem;margin-left:.3rem" onclick="hapusBanner('${b['ID']}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('btnTambahBanner').addEventListener('click', () => {
+  document.getElementById('modalBannerTitle').textContent = 'Tambah Agenda';
+  ['bnID','bnJudul','bnKet','bnLokasi'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('bnStatus').value = 'Aktif';
+  bukaModal('modalBanner');
+});
+
+function editBanner(id) {
+  const b = dataSemua.banner.find(x => x['ID'] === id);
+  if (!b) return;
+  document.getElementById('modalBannerTitle').textContent = 'Edit Agenda';
+  document.getElementById('bnID').value      = b['ID'];
+  document.getElementById('bnJudul').value   = b['Judul'];
+  document.getElementById('bnKet').value     = b['Keterangan'];
+  document.getElementById('bnTanggal').value = b['Tanggal'];
+  document.getElementById('bnWaktu').value   = b['Waktu'];
+  document.getElementById('bnLokasi').value  = b['Lokasi'];
+  document.getElementById('bnStatus').value  = b['Status'];
+  bukaModal('modalBanner');
+}
+
+document.getElementById('btnSimpanBanner').addEventListener('click', async () => {
+  const judul = document.getElementById('bnJudul').value.trim();
+  const tgl   = document.getElementById('bnTanggal').value;
+  if (!judul || !tgl) { toast('Judul dan tanggal wajib diisi.', 'error'); return; }
+  const btn = document.getElementById('btnSimpanBanner');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const id = document.getElementById('bnID').value || buatID('BN');
+    await DB.upsert('banner', {
+      'ID': id, 'Judul': judul, 'Keterangan': document.getElementById('bnKet').value,
+      'Tanggal': tgl, 'Waktu': document.getElementById('bnWaktu').value,
+      'Lokasi': document.getElementById('bnLokasi').value,
+      'Status': document.getElementById('bnStatus').value,
+    });
+    tutupModal('modalBanner');
+    toast('Agenda berhasil disimpan!');
+    await loadData();
+  } catch(e) {
+    toast('Gagal: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '💾 Simpan'; }
+});
+
+async function hapusBanner(id) {
+  if (!confirm('Hapus agenda ini?')) return;
+  try { await DB.hapus('banner', id); toast('Agenda dihapus.'); await loadData(); }
+  catch(e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+// ── RANTING ───────────────────────────────────────────────────
+function renderRanting(filter = '') {
+  const tbody = document.getElementById('tbodyRanting');
+  let list = dataSemua.ranting;
+  if (filter) list = list.filter(r => (r['Nama Ranting']+r['Desa']).toLowerCase().includes(filter.toLowerCase()));
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--abu-3)">Belum ada data.</td></tr>'; return; }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${r['Nama Ranting']}</strong></td>
+      <td>${r['Desa']}</td>
+      <td>${r['Ketua'] || '-'}</td>
+      <td>${r['HP Ketua'] || '-'}</td>
+      <td>${r['Anggota'] || '-'}</td>
+      <td>${badge(r['Status'] || 'Aktif')}</td>
+      <td>
+        <button class="btn btn-abu" style="padding:.3rem .7rem;font-size:.8rem" onclick="editRanting('${r['ID']}')">✏️</button>
+        <button class="btn btn-merah" style="padding:.3rem .7rem;font-size:.8rem;margin-left:.3rem" onclick="hapusRanting('${r['ID']}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('cariRanting').addEventListener('input', e => renderRanting(e.target.value));
+document.getElementById('btnTambahRanting').addEventListener('click', () => {
+  document.getElementById('modalRantingTitle').textContent = 'Tambah Ranting';
+  ['rtID','rtDesa','rtNama','rtKetua','rtHP','rtSek','rtBend','rtAnggota','rtTahun','rtKet'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rtStatus').value = 'Aktif';
+  bukaModal('modalRanting');
+});
+
+function editRanting(id) {
+  const r = dataSemua.ranting.find(x => x['ID'] === id);
+  if (!r) return;
+  document.getElementById('modalRantingTitle').textContent = 'Edit Ranting';
+  document.getElementById('rtID').value      = r['ID'];
+  document.getElementById('rtDesa').value    = r['Desa'];
+  document.getElementById('rtNama').value    = r['Nama Ranting'];
+  document.getElementById('rtKetua').value   = r['Ketua'];
+  document.getElementById('rtHP').value      = r['HP Ketua'];
+  document.getElementById('rtSek').value     = r['Sekretaris'];
+  document.getElementById('rtBend').value    = r['Bendahara'];
+  document.getElementById('rtAnggota').value = r['Anggota'];
+  document.getElementById('rtTahun').value   = r['Tahun Berdiri'];
+  document.getElementById('rtStatus').value  = r['Status'];
+  document.getElementById('rtKet').value     = r['Keterangan'];
+  bukaModal('modalRanting');
+}
+
+document.getElementById('btnSimpanRanting').addEventListener('click', async () => {
+  const desa = document.getElementById('rtDesa').value.trim();
+  const nama = document.getElementById('rtNama').value.trim();
+  if (!desa || !nama) { toast('Desa dan nama ranting wajib diisi.', 'error'); return; }
+  const btn = document.getElementById('btnSimpanRanting');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const id = document.getElementById('rtID').value || buatID('RT');
+    await DB.upsert('ranting', {
+      'ID': id, 'Desa': desa, 'Nama Ranting': nama,
+      'Ketua': document.getElementById('rtKetua').value,
+      'HP Ketua': document.getElementById('rtHP').value,
+      'Sekretaris': document.getElementById('rtSek').value,
+      'Bendahara': document.getElementById('rtBend').value,
+      'Anggota': document.getElementById('rtAnggota').value,
+      'Tahun Berdiri': document.getElementById('rtTahun').value,
+      'Status': document.getElementById('rtStatus').value,
+      'Keterangan': document.getElementById('rtKet').value,
+    });
+    tutupModal('modalRanting');
+    toast('Ranting berhasil disimpan!');
+    await loadData();
+  } catch(e) {
+    toast('Gagal: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '💾 Simpan'; }
+});
+
+async function hapusRanting(id) {
+  if (!confirm('Hapus ranting ini?')) return;
+  try { await DB.hapus('ranting', id); toast('Ranting dihapus.'); await loadData(); }
+  catch(e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+// ── PENGURUS ──────────────────────────────────────────────────
+function renderPengurus(filter = '') {
+  const tbody = document.getElementById('tbodyPengurus');
+  let list = dataSemua.pengurus;
+  if (filter) list = list.filter(p => (p['Nama']+p['Jabatan']).toLowerCase().includes(filter.toLowerCase()));
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--abu-3)">Belum ada data.</td></tr>'; return; }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><strong>${p['Nama']}</strong></td>
+      <td>${p['Jabatan']}</td>
+      <td>${p['Bidang'] || '-'}</td>
+      <td>${p['HP'] || '-'}</td>
+      <td>${p['Periode'] || '-'}</td>
+      <td>
+        <button class="btn btn-abu" style="padding:.3rem .7rem;font-size:.8rem" onclick="editPengurus('${p['ID']}')">✏️</button>
+        <button class="btn btn-merah" style="padding:.3rem .7rem;font-size:.8rem;margin-left:.3rem" onclick="hapusPengurus('${p['ID']}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('cariPengurus').addEventListener('input', e => renderPengurus(e.target.value));
+document.getElementById('btnTambahPengurus').addEventListener('click', () => {
+  document.getElementById('modalPengurusTitle').textContent = 'Tambah Pengurus';
+  ['pgID','pgNama','pgJabatan','pgBidang','pgHP','pgPeriode','pgDesa','pgFoto'].forEach(id => document.getElementById(id).value = '');
+  bukaModal('modalPengurus');
+});
+
+function editPengurus(id) {
+  const p = dataSemua.pengurus.find(x => x['ID'] === id);
+  if (!p) return;
+  document.getElementById('modalPengurusTitle').textContent = 'Edit Pengurus';
+  document.getElementById('pgID').value      = p['ID'];
+  document.getElementById('pgNama').value    = p['Nama'];
+  document.getElementById('pgJabatan').value = p['Jabatan'];
+  document.getElementById('pgBidang').value  = p['Bidang'];
+  document.getElementById('pgHP').value      = p['HP'];
+  document.getElementById('pgPeriode').value = p['Periode'];
+  document.getElementById('pgDesa').value    = p['Asal Desa'];
+  document.getElementById('pgFoto').value    = p['Foto'];
+  bukaModal('modalPengurus');
+}
+
+document.getElementById('btnSimpanPengurus').addEventListener('click', async () => {
+  const nama = document.getElementById('pgNama').value.trim();
+  const jbt  = document.getElementById('pgJabatan').value.trim();
+  if (!nama || !jbt) { toast('Nama dan jabatan wajib diisi.', 'error'); return; }
+  const btn = document.getElementById('btnSimpanPengurus');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const id = document.getElementById('pgID').value || buatID('PG');
+    await DB.upsert('pengurus', {
+      'ID': id, 'Nama': nama, 'Jabatan': jbt,
+      'Bidang': document.getElementById('pgBidang').value,
+      'HP': document.getElementById('pgHP').value,
+      'Periode': document.getElementById('pgPeriode').value,
+      'Asal Desa': document.getElementById('pgDesa').value,
+      'Foto': document.getElementById('pgFoto').value,
+    });
+    tutupModal('modalPengurus');
+    toast('Pengurus berhasil disimpan!');
+    await loadData();
+  } catch(e) {
+    toast('Gagal: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '💾 Simpan'; }
+});
+
+async function hapusPengurus(id) {
+  if (!confirm('Hapus pengurus ini?')) return;
+  try { await DB.hapus('pengurus', id); toast('Pengurus dihapus.'); await loadData(); }
+  catch(e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+// ── PROFIL ────────────────────────────────────────────────────
+function isiFormProfil() {
+  const p = dataSemua.profil || {};
+  const form = document.getElementById('formProfil');
+  form.querySelectorAll('[name]').forEach(el => {
+    if (p[el.name] !== undefined) el.value = p[el.name];
+  });
+}
+
+document.getElementById('formProfil').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.submitter;
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const data = {};
+    new FormData(e.target).forEach((val, key) => data[key] = val);
+    await DB.saveProfil(data);
+    toast('Profil berhasil disimpan!');
+    await loadData();
+  } catch(err) {
+    toast('Gagal: ' + err.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '💾 Simpan Semua Perubahan'; }
+});
+
+// ── GANTI PASSWORD ────────────────────────────────────────────
+document.getElementById('btnGantiPass').addEventListener('click', async () => {
+  const p1  = document.getElementById('passBar').value;
+  const p2  = document.getElementById('passKonfirm').value;
+  if (p1.length < 6)  { toast('Password minimal 6 karakter.', 'error'); return; }
+  if (p1 !== p2)      { toast('Konfirmasi password tidak cocok.', 'error'); return; }
+  const btn = document.getElementById('btnGantiPass');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    await DB.gantiPassword(p1);
+    toast('Password berhasil diganti! Silakan login ulang.');
+    setTimeout(() => { sessionStorage.clear(); location.href = 'login.html'; }, 2000);
+  } catch(e) {
+    toast('Gagal: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '🔑 Ganti Password'; }
+});
+
+// ── INIT ──────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
