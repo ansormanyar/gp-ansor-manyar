@@ -46,7 +46,6 @@ const DB = {
 
     const res  = await fetch(CONFIG.GAS_URL, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify(body),
     });
     const json = await res.json();
@@ -54,16 +53,15 @@ const DB = {
     return json.data;
   },
 
-  async login(username, password) {
-    const res  = await fetch(CONFIG.GAS_URL, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ action: 'login', username, password }),
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error);
-    return json.data; // { token, nama, role }
-  },
+async login(username, password) {
+  const res  = await fetch(CONFIG.GAS_URL, {
+    method : 'POST',
+    body   : JSON.stringify({ action: 'login', username, password }),
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error);
+  return json.data;
+},
 
   async upsert(sheet, data) {
     const result = await this.post({ action: 'upsert', sheet, data });
