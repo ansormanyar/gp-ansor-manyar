@@ -6,7 +6,7 @@
 const CONFIG = {
   // ── WAJIB DIISI SETELAH DEPLOY APPS SCRIPT ──────────────
   // Paste URL /exec dari Google Apps Script deployment di sini
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbxmCuBxa4vPGFEXOxkuFE-QRQhnnyhLGqS86UasBxcTLueffdC3_2zp3bJZr-pklx7tBA/exec',
+  GAS_URL: 'ansor-proxy.pacgpansormanyarmaju.workers.dev',
 
   // ── GITHUB PAGES ────────────────────────────────────────
   // Nama repository GitHub (persis seperti di github.com/user/NAMA_INI)
